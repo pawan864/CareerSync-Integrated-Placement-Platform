@@ -383,140 +383,6 @@ const Home = () => {
                     </motion.div>
                 </AnimatePresence>
 
-                {/* AI Chatbot Window */}
-                <AnimatePresence>
-                    {isChatOpen && (
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.9, y: 20 }}
-                            animate={{ opacity: 1, scale: 1, y: 0 }}
-                            exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                            className="fixed bottom-24 md:bottom-48 right-4 sm:right-8 md:right-12 w-[calc(100vw-2rem)] sm:w-80 md:w-96 bg-white z-[100] rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.2)] border border-gray-100 overflow-hidden z-[100] flex flex-col"
-                        >
-                            {/* Chat Header */}
-                            <div className={`p-4 flex justify-between items-center bg-gradient-to-r ${heroSlides[currentSlide].gradient}`}>
-                                <div className="flex items-center space-x-2">
-                                    <div className="bg-white p-1.5 rounded-full shadow-sm">
-                                        <Bot className={`w-4 h-4 ${['text-[#020817]', 'text-[#431407]', 'text-blue-800'][currentSlide]}`} />
-                                    </div>
-                                    <span className={`font-bold text-white tracking-tight px-3 py-1 rounded-md text-sm shadow-sm transition-colors duration-500 ${currentSlide === 0 ? 'bg-[#020817]' : currentSlide === 1 ? 'bg-[#431407]' : 'bg-blue-800'}`}>CareerSync Assistant</span>
-                                </div>
-                                <button onClick={() => { 
-                                    // If chat was ended, wipe history so it starts fresh next time
-                                    if (messages.length > 0 && messages[messages.length - 1].text.includes("Thank you for connecting")) {
-                                        setMessages([
-                                            { sender: 'bot', text: "Hello. I am your specialized <b>CareerSync Assistant</b>.<br/><br/>I am here to help you navigate the platform, discover top jobs, and manage placements. How can I assist you today?" }
-                                        ]);
-                                    }
-                                    setIsChatOpen(false); 
-                                    setIsPaused(false); 
-                                }} className="text-gray-800 hover:bg-black/10 p-1 rounded-full transition">
-                                    <X className="w-4 h-4" />
-                                </button>
-                            </div>
-                            
-                            {/* Chat Body */}
-                            <div ref={chatBodyRef} className="h-72 p-4 bg-gray-50 overflow-y-auto flex flex-col space-y-4">
-                                <div className="text-xs text-center text-gray-400 font-medium my-1">Today</div>
-                                {messages.map((msg, idx) => (
-                                    <React.Fragment key={idx}>
-                                        <div className={`p-3 rounded-2xl text-sm leading-relaxed shadow-sm max-w-[85%] ${msg.sender === 'user' ? 'bg-gray-800 text-white self-end rounded-tr-sm' : 'bg-white border border-gray-100 text-gray-700 self-start rounded-tl-sm'}`}>
-                                            {msg.sender === 'user' ? (
-                                                msg.text.split('\n').map((line, i) => (
-                                                    <React.Fragment key={i}>
-                                                        {line}
-                                                        {i !== msg.text.split('\n').length - 1 && <br />}
-                                                    </React.Fragment>
-                                                ))
-                                            ) : (
-                                                <div dangerouslySetInnerHTML={{ __html: msg.text }} />
-                                            )}
-                                        </div>
-                                        {msg.sender === 'bot' && idx === 0 && (
-                                            <div className="grid grid-cols-3 gap-2 w-full max-w-[95%] self-start mt-2">
-                                                {quickQueries.map((query, i) => (
-                                                    <button 
-                                                        key={i}
-                                                        type="button"
-                                                        disabled={isTyping}
-                                                        onClick={() => handleSendMessage(null, query)}
-                                                        className="text-[10px] px-1 py-1.5 bg-white border border-blue-500 text-blue-600 font-semibold rounded-lg shadow-sm hover:bg-blue-600 hover:text-white transition-colors disabled:opacity-50 flex items-center justify-center text-center leading-tight whitespace-normal"
-                                                    >
-                                                        {query}
-                                                    </button>
-                                                ))}
-                                            </div>
-                                        )}
-                                        {msg.sender === 'bot' && idx > 0 && idx === messages.length - 1 && !isTyping && !msg.text.includes("Thank you for connecting") && (
-                                            <button 
-                                                onClick={() => {
-                                                    setMessages(prev => [...prev, { sender: 'bot', text: "Thank you for connecting with CareerSync! Have a great day." }]);
-                                                }}
-                                                className="flex items-center space-x-1 text-[10px] text-red-500 hover:text-white hover:bg-red-500 transition-all duration-200 mt-2 mb-2 self-start bg-white border border-red-500 rounded-full px-3 py-1.5 outline-none shadow-sm"
-                                            >
-                                                <X className="w-3 h-3" />
-                                                <span className="font-medium tracking-wide">Close Chat</span>
-                                            </button>
-                                        )}
-                                    </React.Fragment>
-                                ))}
-                                {isTyping && (
-                                    <div className="bg-white p-4 rounded-2xl rounded-tl-sm border border-gray-100 shadow-sm self-start flex items-center space-x-1">
-                                        <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                                        <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-                                        <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
-                                    </div>
-                                )}
-                                <div ref={chatEndRef} />
-                            </div>
-                            
-                            
-                            {/* Chat Input or Placeholder Banners */}
-                              {messages.length > 0 && messages[messages.length - 1].text.includes("Thank you for connecting") ? (
-                                  <div className="p-4 border-t border-gray-100 bg-gray-50 flex items-center justify-center text-center">
-                                      <p className="text-[10px] text-gray-400 font-light tracking-wider">Chat closed. I hope your queries were resolved.</p>
-                                  </div>
-                              ) : messages.length === 1 ? (
-                                  <div className="p-4 border-t border-gray-100 bg-gray-50 flex items-center justify-center text-center">
-                                      <p className="text-[10px] text-gray-400 font-light tracking-wider">No conversation. Click on an icon above to proceed to chat.</p>
-                                  </div>
-                              ) : (
-                                  <form onSubmit={(e) => handleSendMessage(e)} className="p-3 border-t border-gray-100 bg-white flex items-center space-x-2">
-                                      <input 
-                                          type="text" 
-                                          value={chatInput}
-                                          onChange={(e) => setChatInput(e.target.value)}
-                                          placeholder="Ask me anything..." 
-                                          className="flex-1 bg-gray-100 border-transparent focus:bg-white focus:border-gray-300 focus:ring-0 rounded-full px-4 py-2 text-sm transition outline-none" 
-                                      />
-                                      <button type="submit" disabled={!chatInput.trim() || isTyping} className={`p-2 rounded-full text-white shadow-md hover:shadow-lg transition disabled:opacity-50 disabled:cursor-not-allowed ${['bg-blue-600 hover:bg-blue-700', 'bg-indigo-600 hover:bg-indigo-700', 'bg-amber-800 hover:bg-amber-900'][currentSlide]}`}>
-                                          <ArrowRight className="w-4 h-4" />
-                                      </button>
-                                  </form>
-                              )}
-                        </motion.div>
-                    )}
-                </AnimatePresence>
-
-                {/* Hero Chatbot Icon (Bottom Right) */}
-                <AnimatePresence>
-                {!isChatOpen && (
-                    <motion.button 
-                        initial={{ scale: 0, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        exit={{ scale: 0, opacity: 0 }}
-                        transition={{ delay: 0.1, type: "spring", stiffness: 200 }}
-                        className={`fixed bottom-8 md:bottom-28 right-4 sm:right-8 md:right-12 z-[100] p-3.5 rounded-full bg-white shadow-[0_10px_25px_-5px_rgba(0,0,0,0.3)] hover:shadow-2xl focus:shadow-2xl border-2 border-transparent hover:border-gray-100 transition-all duration-300 hover:scale-110 flex items-center justify-center group`}
-                        onClick={() => {
-                            setIsChatOpen(true);
-                            setIsPaused(true);
-                        }}
-                    >
-                        <span className="absolute bottom-full right-1/2 translate-x-1/2 mb-4 bg-gray-800 text-white text-[10px] font-semibold px-2.5 py-1 rounded-md opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity whitespace-nowrap pointer-events-none shadow-lg">CareerSync Assistant</span>
-                        <Bot className={`w-7 h-7 transition-colors duration-500 ${['text-[#020817]', 'text-[#431407]', 'text-blue-800'][currentSlide]}`} />
-                    </motion.button>
-                )}
-                </AnimatePresence>
-
                 {/* Slideshow Indicators */}
                 <div className={`absolute bottom-10 left-1/2 transform -translate-x-1/2 flex items-center space-x-2 z-20 bg-white/10 hover:bg-white/20 backdrop-blur-md px-4 py-2 sm:px-5 sm:py-2.5 rounded-full border border-white/20 shadow-sm transition-all duration-500 cursor-pointer group ${heroSlides[currentSlide].pillGlow}`}>
                     
@@ -981,6 +847,142 @@ const Home = () => {
             </motion.div>
 
         </motion.div>
+
+        {/* Global Persistent Floating AI Chatbot */}
+
+                {/* AI Chatbot Window */}
+                <AnimatePresence>
+                    {isChatOpen && (
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                            className="fixed bottom-4 sm:bottom-6 md:bottom-24 right-4 sm:right-6 md:right-12 w-[calc(100vw-2rem)] sm:w-80 md:w-96 max-h-[min(520px,calc(100dvh-7rem))] bg-white z-[150] rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.25)] border border-gray-100 overflow-hidden flex flex-col"
+                        >
+                            {/* Chat Header */}
+                            <div className={`p-4 flex justify-between items-center bg-gradient-to-r ${heroSlides[currentSlide].gradient}`}>
+                                <div className="flex items-center space-x-2">
+                                    <div className="bg-white p-1.5 rounded-full shadow-sm">
+                                        <Bot className={`w-4 h-4 ${['text-[#020817]', 'text-[#431407]', 'text-blue-800'][currentSlide]}`} />
+                                    </div>
+                                    <span className={`font-bold text-white tracking-tight px-3 py-1 rounded-md text-sm shadow-sm transition-colors duration-500 ${currentSlide === 0 ? 'bg-[#020817]' : currentSlide === 1 ? 'bg-[#431407]' : 'bg-blue-800'}`}>CareerSync Assistant</span>
+                                </div>
+                                <button onClick={() => { 
+                                    // If chat was ended, wipe history so it starts fresh next time
+                                    if (messages.length > 0 && messages[messages.length - 1].text.includes("Thank you for connecting")) {
+                                        setMessages([
+                                            { sender: 'bot', text: "Hello. I am your specialized <b>CareerSync Assistant</b>.<br/><br/>I am here to help you navigate the platform, discover top jobs, and manage placements. How can I assist you today?" }
+                                        ]);
+                                    }
+                                    setIsChatOpen(false); 
+                                    setIsPaused(false); 
+                                }} className="text-gray-800 hover:bg-black/10 p-1 rounded-full transition">
+                                    <X className="w-4 h-4" />
+                                </button>
+                            </div>
+                            
+                            {/* Chat Body */}
+                            <div ref={chatBodyRef} className="h-72 p-4 bg-gray-50 overflow-y-auto flex flex-col space-y-4">
+                                <div className="text-xs text-center text-gray-400 font-medium my-1">Today</div>
+                                {messages.map((msg, idx) => (
+                                    <React.Fragment key={idx}>
+                                        <div className={`p-3 rounded-2xl text-sm leading-relaxed shadow-sm max-w-[85%] ${msg.sender === 'user' ? 'bg-gray-800 text-white self-end rounded-tr-sm' : 'bg-white border border-gray-100 text-gray-700 self-start rounded-tl-sm'}`}>
+                                            {msg.sender === 'user' ? (
+                                                msg.text.split('\n').map((line, i) => (
+                                                    <React.Fragment key={i}>
+                                                        {line}
+                                                        {i !== msg.text.split('\n').length - 1 && <br />}
+                                                    </React.Fragment>
+                                                ))
+                                            ) : (
+                                                <div dangerouslySetInnerHTML={{ __html: msg.text }} />
+                                            )}
+                                        </div>
+                                        {msg.sender === 'bot' && idx === 0 && (
+                                            <div className="grid grid-cols-3 gap-2 w-full max-w-[95%] self-start mt-2">
+                                                {quickQueries.map((query, i) => (
+                                                    <button 
+                                                        key={i}
+                                                        type="button"
+                                                        disabled={isTyping}
+                                                        onClick={() => handleSendMessage(null, query)}
+                                                        className="text-[10px] px-1 py-1.5 bg-white border border-blue-500 text-blue-600 font-semibold rounded-lg shadow-sm hover:bg-blue-600 hover:text-white transition-colors disabled:opacity-50 flex items-center justify-center text-center leading-tight whitespace-normal"
+                                                    >
+                                                        {query}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        )}
+                                        {msg.sender === 'bot' && idx > 0 && idx === messages.length - 1 && !isTyping && !msg.text.includes("Thank you for connecting") && (
+                                            <button 
+                                                onClick={() => {
+                                                    setMessages(prev => [...prev, { sender: 'bot', text: "Thank you for connecting with CareerSync! Have a great day." }]);
+                                                }}
+                                                className="flex items-center space-x-1 text-[10px] text-red-500 hover:text-white hover:bg-red-500 transition-all duration-200 mt-2 mb-2 self-start bg-white border border-red-500 rounded-full px-3 py-1.5 outline-none shadow-sm"
+                                            >
+                                                <X className="w-3 h-3" />
+                                                <span className="font-medium tracking-wide">Close Chat</span>
+                                            </button>
+                                        )}
+                                    </React.Fragment>
+                                ))}
+                                {isTyping && (
+                                    <div className="bg-white p-4 rounded-2xl rounded-tl-sm border border-gray-100 shadow-sm self-start flex items-center space-x-1">
+                                        <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                                        <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                                        <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                                    </div>
+                                )}
+                                <div ref={chatEndRef} />
+                            </div>
+                            
+                            
+                            {/* Chat Input or Placeholder Banners */}
+                              {messages.length > 0 && messages[messages.length - 1].text.includes("Thank you for connecting") ? (
+                                  <div className="p-4 border-t border-gray-100 bg-gray-50 flex items-center justify-center text-center">
+                                      <p className="text-[10px] text-gray-400 font-light tracking-wider">Chat closed. I hope your queries were resolved.</p>
+                                  </div>
+                              ) : messages.length === 1 ? (
+                                  <div className="p-4 border-t border-gray-100 bg-gray-50 flex items-center justify-center text-center">
+                                      <p className="text-[10px] text-gray-400 font-light tracking-wider">No conversation. Click on an icon above to proceed to chat.</p>
+                                  </div>
+                              ) : (
+                                  <form onSubmit={(e) => handleSendMessage(e)} className="p-3 border-t border-gray-100 bg-white flex items-center space-x-2">
+                                      <input 
+                                          type="text" 
+                                          value={chatInput}
+                                          onChange={(e) => setChatInput(e.target.value)}
+                                          placeholder="Ask me anything..." 
+                                          className="flex-1 bg-gray-100 border-transparent focus:bg-white focus:border-gray-300 focus:ring-0 rounded-full px-4 py-2 text-sm transition outline-none" 
+                                      />
+                                      <button type="submit" disabled={!chatInput.trim() || isTyping} className={`p-2 rounded-full text-white shadow-md hover:shadow-lg transition disabled:opacity-50 disabled:cursor-not-allowed ${['bg-blue-600 hover:bg-blue-700', 'bg-indigo-600 hover:bg-indigo-700', 'bg-amber-800 hover:bg-amber-900'][currentSlide]}`}>
+                                          <ArrowRight className="w-4 h-4" />
+                                      </button>
+                                  </form>
+                              )}
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+
+                {/* Hero Chatbot Icon (Bottom Right) */}
+                <AnimatePresence>
+                {!isChatOpen && (
+                    <motion.button 
+                        initial={{ scale: 0, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        exit={{ scale: 0, opacity: 0 }}
+                        transition={{ delay: 0.1, type: "spring", stiffness: 200 }}
+                        className={`fixed bottom-4 sm:bottom-6 md:bottom-24 right-4 sm:right-6 md:right-12 z-[150] p-3.5 rounded-full bg-white shadow-[0_10px_25px_-5px_rgba(0,0,0,0.3)] hover:shadow-2xl focus:shadow-2xl border-2 border-transparent hover:border-gray-100 transition-all duration-300 hover:scale-110 flex items-center justify-center group`}
+                        onClick={() => {
+                            setIsChatOpen(true);
+                            setIsPaused(true);
+                        }}
+                    >
+                        <span className="absolute bottom-full right-1/2 translate-x-1/2 mb-4 bg-gray-800 text-white text-[10px] font-semibold px-2.5 py-1 rounded-md opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity whitespace-nowrap pointer-events-none shadow-lg">CareerSync Assistant</span>
+                        <Bot className={`w-7 h-7 transition-colors duration-500 ${['text-[#020817]', 'text-[#431407]', 'text-blue-800'][currentSlide]}`} />
+                    </motion.button>
+                )}
+                </AnimatePresence>
 
         {/* Professional Cookie Consent Banner (Horizontal) */}
         <AnimatePresence>
