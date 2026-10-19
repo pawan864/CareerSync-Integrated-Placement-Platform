@@ -1,12 +1,29 @@
 import React, { useState, useEffect, useContext } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import api from '../services/api';
 import { AuthContext } from '../context/AuthContext';
 
 const JobBoard = () => {
     const { user } = useContext(AuthContext);
+    const [searchParams] = useSearchParams();
+    const typeParam = searchParams.get('type');
+
     const [opportunities, setOpportunities] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [filter, setFilter] = useState('');
+    const [filter, setFilter] = useState(() => {
+        if (typeParam?.toLowerCase() === 'internship') return 'Internship';
+        if (typeParam?.toLowerCase() === 'placement') return 'Placement';
+        if (typeParam?.toLowerCase() === 'project') return 'Project';
+        return '';
+    });
+
+    useEffect(() => {
+        if (typeParam) {
+            if (typeParam.toLowerCase() === 'internship') setFilter('Internship');
+            else if (typeParam.toLowerCase() === 'placement') setFilter('Placement');
+            else if (typeParam.toLowerCase() === 'project') setFilter('Project');
+        }
+    }, [typeParam]);
 
     useEffect(() => {
         fetchOpportunities();

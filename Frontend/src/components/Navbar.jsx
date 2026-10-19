@@ -1,8 +1,10 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
-import { GraduationCap, Menu, X, ChevronDown } from 'lucide-react';
+import { GraduationCap, Menu, X, ChevronDown, Eye } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import NavShowcaseModal from './NavShowcaseModal';
+import { navCardsData } from '../data/navCardsData';
 
 const Navbar = () => {
     const { user, logout } = useContext(AuthContext);
@@ -13,6 +15,17 @@ const Navbar = () => {
     const [mobileExpandedItem, setMobileExpandedItem] = useState(null);
     const [navTheme, setNavTheme] = useState('indigo');
     const [isSliderPaused, setIsSliderPaused] = useState(false);
+    const [activeShowcaseCard, setActiveShowcaseCard] = useState(null);
+
+    const handleItemClick = (e, detail) => {
+        if (detail.cardId && navCardsData[detail.cardId]) {
+            e.preventDefault();
+            setActiveShowcaseCard(navCardsData[detail.cardId]);
+            setIsMobileMenuOpen(false);
+        } else {
+            setIsMobileMenuOpen(false);
+        }
+    };
 
     useEffect(() => {
         if (!isMobileMenuOpen) {
@@ -87,18 +100,18 @@ const Navbar = () => {
             name: 'Home', href: '/',
             details: [
                 { title: 'Overview', desc: 'Back to the main dashboard', link: '/' },
-                { title: 'Platform Features', desc: 'See what CareerSync offers', link: '/' },
-                { title: 'Success Stories', desc: 'Read about our alumni', link: '/' },
-                { title: 'Testimonials', desc: 'What partners say about us', link: '/' }
+                { title: 'Platform Features', desc: 'See what CareerSync offers', cardId: 'home-features' },
+                { title: 'Success Stories', desc: 'Read about our alumni', cardId: 'home-success' },
+                { title: 'Testimonials', desc: 'What partners say about us', cardId: 'home-testimonials' }
             ]
         },
         {
             name: 'About', href: '/',
             details: [
-                { title: 'Our Mission', desc: 'Learn about CareerSync', link: '/' },
-                { title: 'Our Team', desc: 'Meet the creators behind the platform', link: '/' },
+                { title: 'Our Mission', desc: 'Learn about CareerSync', cardId: 'about-mission' },
+                { title: 'Our Team', desc: 'Meet the creators behind the platform', cardId: 'about-team' },
                 { title: 'Careers', desc: 'Join our growing team', link: '/jobs' },
-                { title: 'Contact Us', desc: 'Get in touch with headquarters', link: '/support' }
+                { title: 'Contact Us', desc: 'Get in touch with headquarters', link: '/support?type=helpdesk' }
             ]
         },
         {
@@ -107,32 +120,32 @@ const Navbar = () => {
                 { title: 'Skill Analysis', desc: 'Find your skill gaps with AI', link: '/skill-gap' },
                 { title: 'Build Profile', desc: 'Showcase your portfolio to employers', link: '/profile' },
                 { title: 'Career Paths', desc: 'Explore tech and non-tech roles', link: '/jobs' },
-                { title: 'Mock Interviews', desc: 'Practice with AI interviewers', link: '/register' }
+                { title: 'Mock Interviews', desc: 'Practice with AI interviewers', cardId: 'student-mock-interviews' }
             ]
         },
         {
             name: 'Institutions', href: '/institution',
             details: [
                 { title: 'TPO Dashboard', desc: 'Track comprehensive placement metrics', link: '/institution' },
-                { title: 'Student Roster', desc: 'Manage your batches and departments', link: '/institution' },
-                { title: 'Placement Reports', desc: 'Generate real-time analytics', link: '/institution' },
-                { title: 'Alumni Network', desc: 'Connect with past graduates', link: '/institution' }
+                { title: 'Student Roster', desc: 'Manage your batches and departments', cardId: 'institution-roster' },
+                { title: 'Placement Reports', desc: 'Generate real-time analytics', cardId: 'institution-reports' },
+                { title: 'Alumni Network', desc: 'Connect with past graduates', cardId: 'institution-alumni' }
             ]
         },
         {
             name: 'Employers', href: '/employer',
             details: [
                 { title: 'Post Opportunities', desc: 'Hire top campus talent quickly', link: '/employer' },
-                { title: 'Talent Search', desc: 'Filter through verified students', link: '/employer' },
+                { title: 'Talent Search', desc: 'Filter through verified students', cardId: 'employer-talent-search' },
                 { title: 'Company Profile', desc: 'Manage your employer brand', link: '/employer' },
-                { title: 'Hiring Analytics', desc: 'Track your hiring pipeline', link: '/employer' }
+                { title: 'Hiring Analytics', desc: 'Track your hiring pipeline', cardId: 'employer-analytics' }
             ]
         },
         {
             name: 'Jobs', href: '/jobs',
             details: [
                 { title: 'Job Board', desc: 'Browse all active full-time jobs', link: '/jobs' },
-                { title: 'Internships', desc: 'Start your career with summer roles', link: '/jobs' },
+                { title: 'Internships', desc: 'Start your career with summer roles', link: '/jobs?type=internship' },
                 { title: 'Saved Jobs', desc: 'View roles you bookmarked', link: '/jobs' },
                 { title: 'Application History', desc: 'Track your submitted applications', link: '/jobs' }
             ]
@@ -140,40 +153,58 @@ const Navbar = () => {
         {
             name: 'Mentorship', href: '/register',
             details: [
-                { title: 'Find a Mentor', desc: 'Connect with industry experts', link: '/register' },
-                { title: 'Become a Mentor', desc: 'Guide the next generation of talent', link: '/register' },
-                { title: 'Mentorship Programs', desc: 'Join structured 6-week cohorts', link: '/register' },
-                { title: 'Success Stories', desc: 'Read about successful mentor pairs', link: '/register' }
+                { title: 'Find a Mentor', desc: 'Connect with industry experts', cardId: 'mentorship-find' },
+                { title: 'Become a Mentor', desc: 'Guide the next generation of talent', cardId: 'mentorship-become' },
+                { title: 'Mentorship Programs', desc: 'Join structured 6-week cohorts', cardId: 'mentorship-programs' },
+                { title: 'Success Stories', desc: 'Read about successful mentor pairs', cardId: 'mentorship-success' }
             ]
         },
         {
             name: 'Events', href: '/jobs',
             details: [
-                { title: 'Career Fairs', desc: 'Upcoming campus hiring drives', link: '/' },
-                { title: 'Workshops', desc: 'Skill-building technical sessions', link: '/' },
-                { title: 'Webinars', desc: 'Learn from industry thought leaders', link: '/' },
-                { title: 'Hackathons', desc: 'Compete and showcase your coding skills', link: '/' }
+                { title: 'Career Fairs', desc: 'Upcoming campus hiring drives', cardId: 'events-fairs' },
+                { title: 'Workshops', desc: 'Skill-building technical sessions', cardId: 'events-workshops' },
+                { title: 'Webinars', desc: 'Learn from industry thought leaders', cardId: 'events-webinars' },
+                { title: 'Hackathons', desc: 'Compete and showcase your coding skills', cardId: 'events-hackathons' }
             ]
         },
         {
             name: 'Careers', href: '/jobs',
             details: [
                 { title: 'Job Board', desc: 'Browse full-time & tech opportunities', link: '/jobs' },
-                { title: 'Campus Drives', desc: 'Upcoming recruitment drives and notices', link: '/jobs' },
-                { title: 'Internship Hub', desc: 'Paid summer & winter industrial roles', link: '/jobs' },
+                { title: 'Campus Drives', desc: 'Upcoming recruitment drives and notices', cardId: 'careers-drives' },
+                { title: 'Internship Hub', desc: 'Paid summer & winter industrial roles', link: '/jobs?type=internship' },
                 { title: 'Skill Roadmap', desc: 'AI-guided benchmark & skill analysis', link: '/skill-gap' }
             ]
         },
         {
             name: 'Contact', href: '/support',
             details: [
-                { title: 'Support Helpdesk', desc: 'Get help with your account issues', link: '/support' },
-                { title: 'Partnerships', desc: 'Collaborate and partner with us', link: '/support' },
-                { title: 'Sales Inquiries', desc: 'Talk to our enterprise sales team', link: '/support' },
-                { title: 'FAQ', desc: 'Frequently asked questions', link: '/support' }
+                { title: 'Support Helpdesk', desc: 'Get help with your account issues', link: '/support?type=helpdesk' },
+                { title: 'Partnerships', desc: 'Collaborate and partner with us', link: '/support?type=partnerships' },
+                { title: 'Sales Inquiries', desc: 'Talk to our enterprise sales team', link: '/support?type=sales' },
+                { title: 'FAQ', desc: 'Frequently asked questions', link: '/support?type=faq' }
             ]
         }
     ];
+
+    // Content-aware dynamic dropdown width mapping
+    const getDropdownWidth = (name) => {
+        switch (name) {
+            case 'Events':
+                return 'w-80';
+            case 'Students':
+            case 'Institutions':
+            case 'Employers':
+            case 'Mentorship':
+            case 'Home':
+            case 'About':
+            case 'Careers':
+                return 'w-72';
+            default:
+                return 'w-64';
+        }
+    };
 
     return (
         <>
@@ -226,17 +257,26 @@ const Navbar = () => {
                                         {item.name}
                                     </Link>
                                     
-                                    {/* Floating Dropdown Card */}
-                                    <div className={`absolute ${item.name === 'Contact' ? 'right-0' : 'left-0'} mt-0 w-64 pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:translate-y-1 group-hover:visible transition-all duration-200 z-50`}>
-                                        <div className={`bg-gradient-to-r ${dynamicStyles[currentTheme].bg} rounded-xl shadow-xl border border-gray-100 p-3 overflow-hidden transition-colors duration-500`}>
+                                    {/* Floating Dropdown Card with Content-Aware Width & Alignment */}
+                                    <div className={`absolute ${item.name === 'Contact' || item.name === 'Careers' ? 'right-0' : 'left-0'} mt-0 ${getDropdownWidth(item.name)} pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:translate-y-1 group-hover:visible transition-all duration-200 z-50`}>
+                                        <div className={`bg-gradient-to-r ${dynamicStyles[currentTheme].bg} rounded-xl shadow-xl border border-gray-100 p-2.5 overflow-hidden transition-colors duration-500`}>
                                             {item.details.map((detail, idx) => (
                                                 <Link 
                                                     key={idx} 
-                                                    to={detail.link}
-                                                    className={`block p-3 rounded-lg hover:bg-white hover:shadow-lg ${dynamicStyles[currentTheme].shadow} transition-all duration-300`}
+                                                    to={detail.link || '#'}
+                                                    onClick={(e) => handleItemClick(e, detail)}
+                                                    className={`block p-2.5 rounded-lg hover:bg-white hover:shadow-lg ${dynamicStyles[currentTheme].shadow} transition-all duration-300 cursor-pointer mb-1 last:mb-0`}
                                                 >
-                                                    <div className="font-semibold text-gray-900 text-sm">{detail.title}</div>
-                                                    <div className="text-xs text-gray-500 mt-1">{detail.desc}</div>
+                                                    <div className="font-semibold text-gray-900 text-sm flex items-center justify-between gap-1.5">
+                                                        <span className="truncate">{detail.title}</span>
+                                                        {detail.cardId && (
+                                                            <span className="text-[10px] font-bold text-blue-600 bg-blue-50 border border-blue-200/60 px-1.5 py-0.5 rounded-md flex items-center gap-1 shrink-0">
+                                                                <Eye className="w-3 h-3 text-blue-600" />
+                                                                View
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                    <div className="text-xs text-gray-500 mt-0.5 truncate">{detail.desc}</div>
                                                 </Link>
                                             ))}
                                         </div>
@@ -344,18 +384,25 @@ const Navbar = () => {
                                                     {item.details.map((detail, idx) => (
                                                         <Link
                                                             key={idx}
-                                                            to={detail.link}
-                                                            onClick={() => {
-                                                                setIsMobileMenuOpen(false);
+                                                            to={detail.link || '#'}
+                                                            onClick={(e) => {
+                                                                handleItemClick(e, detail);
                                                                 setMobileExpandedItem(null);
                                                             }}
-                                                            className="block p-2.5 rounded-lg bg-slate-50/90 active:bg-blue-50/80 border border-slate-200/70 transition-all active:scale-[0.99]"
+                                                            className="block p-2.5 rounded-lg bg-slate-50/90 active:bg-blue-50/80 border border-slate-200/70 transition-all active:scale-[0.99] cursor-pointer"
                                                         >
-                                                            <div className="flex items-center justify-between">
+                                                            <div className="flex items-center justify-between gap-1.5">
                                                                 <span className="font-semibold text-slate-900 text-xs">
                                                                     {detail.title}
                                                                 </span>
-                                                                <span className="text-[11px] font-bold text-blue-600">→</span>
+                                                                {detail.cardId ? (
+                                                                    <span className="text-[10px] font-bold text-blue-600 bg-blue-50 border border-blue-200/60 px-1.5 py-0.5 rounded-md flex items-center gap-1 shrink-0">
+                                                                        <Eye className="w-3 h-3 text-blue-600" />
+                                                                        View
+                                                                    </span>
+                                                                ) : (
+                                                                    <span className="text-[11px] font-bold text-slate-400">→</span>
+                                                                )}
                                                             </div>
                                                             <div className="text-[11px] text-slate-500 mt-0.5 leading-snug">
                                                                 {detail.desc}
@@ -412,6 +459,13 @@ const Navbar = () => {
                 )}
             </AnimatePresence>
         </motion.nav>
+
+        {/* Rectangular Long Card Showcase Modal for Navbar Details */}
+        <NavShowcaseModal
+            isOpen={Boolean(activeShowcaseCard)}
+            onClose={() => setActiveShowcaseCard(null)}
+            cardData={activeShowcaseCard}
+        />
         </>
     );
 };

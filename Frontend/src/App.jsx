@@ -29,7 +29,7 @@ import Footer from './components/Footer';
 
 const AppContent = () => {
   const location = useLocation();
-  const isAuthPage = location.pathname === '/login' || location.pathname === '/github/callback' || location.pathname === '/register' || location.pathname === '/forgot-password' || location.pathname === '/support' || location.pathname === '/admin-login' || location.pathname === '/otp-verify' || location.pathname === '/student-dashboard' || location.pathname === '/admin-dashboard' || location.pathname === '/faculty-dashboard';
+  const isAuthPage = location.pathname === '/login' || location.pathname === '/github/callback' || location.pathname === '/register' || location.pathname === '/forgot-password' || location.pathname === '/admin-login' || location.pathname === '/otp-verify' || location.pathname === '/student-dashboard' || location.pathname === '/admin-dashboard' || location.pathname === '/faculty-dashboard';
 
   return (
     <div className="min-h-[100dvh] bg-gray-50 flex flex-col w-full max-w-[100vw] overflow-x-hidden md:overflow-x-clip">
@@ -43,7 +43,11 @@ const AppContent = () => {
           <Route path="/admin-login" element={<AdminLogin />} />
           <Route path="/admin-dashboard" element={<AdminDashboard />} />
           <Route path="/register" element={<Register />} />
-                <Route path="/support" element={<Support />} />
+          <Route path="/support" element={<Support defaultType="helpdesk" />} />
+          <Route path="/contact" element={<Support defaultType="helpdesk" />} />
+          <Route path="/partnerships" element={<Support defaultType="partnerships" />} />
+          <Route path="/sales" element={<Support defaultType="sales" />} />
+          <Route path="/faq" element={<Support defaultType="faq" />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/skill-gap" element={<SkillGap />} />
