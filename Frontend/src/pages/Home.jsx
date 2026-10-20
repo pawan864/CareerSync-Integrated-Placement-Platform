@@ -751,18 +751,18 @@ const Home = () => {
                         <div className="absolute top-1/2 left-[60%] -translate-x-1/2 -translate-y-1/2 w-[540px] h-[380px] bg-gradient-to-r from-blue-600/25 via-indigo-500/15 to-transparent blur-3xl pointer-events-none rounded-full group-hover/card:from-blue-500/35 group-hover/card:scale-110 transition-all duration-700" />
                         <div className="absolute top-0 right-0 w-80 h-80 bg-blue-500/10 group-hover/card:bg-blue-400/20 blur-2xl pointer-events-none rounded-full transition-all duration-700" />
 
-                        <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center p-8 sm:p-12 md:p-14 lg:p-16">
+                        <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-8 lg:gap-12 items-center p-5 sm:p-10 md:p-14 lg:p-16">
                             {/* Left Column: Heading, Description & Action */}
                             <div className="lg:col-span-6 flex flex-col items-start max-w-xl">
-                                <h3 className="text-3xl sm:text-4xl lg:text-[40px] font-serif font-bold text-white group-hover/card:text-amber-50/95 tracking-tight leading-[1.15] transition-colors duration-300">
+                                <h3 className="text-2xl sm:text-3xl md:text-4xl lg:text-[40px] font-serif font-bold text-white group-hover/card:text-amber-50/95 tracking-tight leading-[1.15] transition-colors duration-300">
                                     Who should enroll?
                                 </h3>
-                                <p className="mt-4 sm:mt-5 text-sm sm:text-base text-zinc-300 font-normal leading-relaxed">
+                                <p className="mt-2.5 sm:mt-4 md:mt-5 text-xs sm:text-sm md:text-base text-zinc-300 font-normal leading-relaxed">
                                     An integrated campus placement ecosystem designed for every stakeholder — empowering students, faculty mentors, placement officers, and corporate recruiters.
                                 </p>
                                 <button 
                                     onClick={() => { setActiveWorkflowRole('student'); setShowWorkflowModal(true); }}
-                                    className="mt-6 sm:mt-8 px-6 py-2.5 rounded-full border border-white/40 hover:border-amber-300 text-white hover:text-amber-200 text-xs sm:text-sm font-medium tracking-wide transition-all duration-300 hover:bg-amber-400/10 hover:shadow-[0_0_20px_rgba(242,206,133,0.25)] active:scale-95 inline-flex items-center gap-2 group cursor-pointer"
+                                    className="mt-4 sm:mt-6 md:mt-8 px-5 py-2 sm:px-6 sm:py-2.5 rounded-full border border-white/40 hover:border-amber-300 text-white hover:text-amber-200 text-xs sm:text-sm font-medium tracking-wide transition-all duration-300 hover:bg-amber-400/10 hover:shadow-[0_0_20px_rgba(242,206,133,0.25)] active:scale-95 inline-flex items-center gap-2 group cursor-pointer"
                                 >
                                     <span>How it works</span>
                                     <ArrowRight className="w-4 h-4 text-amber-300 group-hover:translate-x-1 transition-transform" />
@@ -774,9 +774,9 @@ const Home = () => {
                                 {/* Top-Left: Students */}
                                 <button 
                                     onClick={() => { setActiveWorkflowRole('student'); setShowWorkflowModal(true); }}
-                                    className="border-r border-b border-white/15 py-6 px-4 sm:py-8 sm:px-6 flex items-center justify-center cursor-pointer group hover:bg-amber-400/[0.08] hover:shadow-[inset_0_0_30px_rgba(242,206,133,0.12)] transition-all duration-300"
+                                    className="border-r border-b border-white/15 py-3.5 px-3 sm:py-6 md:py-8 sm:px-6 flex items-center justify-center cursor-pointer group hover:bg-amber-400/[0.08] hover:shadow-[inset_0_0_30px_rgba(242,206,133,0.12)] transition-all duration-300"
                                 >
-                                    <span className="font-serif font-bold text-lg sm:text-xl md:text-2xl lg:text-3xl tracking-tight text-[#F2CE85] group-hover:text-[#FFE3A8] drop-shadow-[0_2px_12px_rgba(242,206,133,0.25)] group-hover:drop-shadow-[0_4px_22px_rgba(242,206,133,0.5)] select-none group-hover:scale-105 transition-all duration-300">
+                                    <span className="font-serif font-bold text-base sm:text-xl md:text-2xl lg:text-3xl tracking-tight text-[#F2CE85] group-hover:text-[#FFE3A8] drop-shadow-[0_2px_12px_rgba(242,206,133,0.25)] group-hover:drop-shadow-[0_4px_22px_rgba(242,206,133,0.5)] select-none group-hover:scale-105 transition-all duration-300">
                                         Students
                                     </span>
                                 </button>
@@ -784,9 +784,9 @@ const Home = () => {
                                 {/* Top-Right: Faculty */}
                                 <button 
                                     onClick={() => { setActiveWorkflowRole('faculty'); setShowWorkflowModal(true); }}
-                                    className="border-b border-white/15 py-6 px-4 sm:py-8 sm:px-6 flex items-center justify-center cursor-pointer group hover:bg-amber-400/[0.08] hover:shadow-[inset_0_0_30px_rgba(242,206,133,0.12)] transition-all duration-300"
+                                    className="border-b border-white/15 py-3.5 px-3 sm:py-6 md:py-8 sm:px-6 flex items-center justify-center cursor-pointer group hover:bg-amber-400/[0.08] hover:shadow-[inset_0_0_30px_rgba(242,206,133,0.12)] transition-all duration-300"
                                 >
-                                    <span className="font-serif font-bold text-lg sm:text-xl md:text-2xl lg:text-3xl tracking-tight text-[#F2CE85] group-hover:text-[#FFE3A8] drop-shadow-[0_2px_12px_rgba(242,206,133,0.25)] group-hover:drop-shadow-[0_4px_22px_rgba(242,206,133,0.5)] select-none group-hover:scale-105 transition-all duration-300">
+                                    <span className="font-serif font-bold text-base sm:text-xl md:text-2xl lg:text-3xl tracking-tight text-[#F2CE85] group-hover:text-[#FFE3A8] drop-shadow-[0_2px_12px_rgba(242,206,133,0.25)] group-hover:drop-shadow-[0_4px_22px_rgba(242,206,133,0.5)] select-none group-hover:scale-105 transition-all duration-300">
                                         Faculty
                                     </span>
                                 </button>
@@ -794,9 +794,9 @@ const Home = () => {
                                 {/* Bottom-Left: TPO */}
                                 <button 
                                     onClick={() => { setActiveWorkflowRole('tpo'); setShowWorkflowModal(true); }}
-                                    className="border-r border-white/15 py-6 px-4 sm:py-8 sm:px-6 flex items-center justify-center cursor-pointer group hover:bg-amber-400/[0.08] hover:shadow-[inset_0_0_30px_rgba(242,206,133,0.12)] transition-all duration-300"
+                                    className="border-r border-white/15 py-3.5 px-3 sm:py-6 md:py-8 sm:px-6 flex items-center justify-center cursor-pointer group hover:bg-amber-400/[0.08] hover:shadow-[inset_0_0_30px_rgba(242,206,133,0.12)] transition-all duration-300"
                                 >
-                                    <span className="font-serif font-bold text-lg sm:text-xl md:text-2xl lg:text-3xl tracking-tight text-[#F2CE85] group-hover:text-[#FFE3A8] drop-shadow-[0_2px_12px_rgba(242,206,133,0.25)] group-hover:drop-shadow-[0_4px_22px_rgba(242,206,133,0.5)] select-none group-hover:scale-105 transition-all duration-300">
+                                    <span className="font-serif font-bold text-base sm:text-xl md:text-2xl lg:text-3xl tracking-tight text-[#F2CE85] group-hover:text-[#FFE3A8] drop-shadow-[0_2px_12px_rgba(242,206,133,0.25)] group-hover:drop-shadow-[0_4px_22px_rgba(242,206,133,0.5)] select-none group-hover:scale-105 transition-all duration-300">
                                         TPO
                                     </span>
                                 </button>
@@ -804,9 +804,9 @@ const Home = () => {
                                 {/* Bottom-Right: Recruiter */}
                                 <button 
                                     onClick={() => { setActiveWorkflowRole('recruiter'); setShowWorkflowModal(true); }}
-                                    className="py-6 px-4 sm:py-8 sm:px-6 flex items-center justify-center cursor-pointer group hover:bg-amber-400/[0.08] hover:shadow-[inset_0_0_30px_rgba(242,206,133,0.12)] transition-all duration-300"
+                                    className="py-3.5 px-3 sm:py-6 md:py-8 sm:px-6 flex items-center justify-center cursor-pointer group hover:bg-amber-400/[0.08] hover:shadow-[inset_0_0_30px_rgba(242,206,133,0.12)] transition-all duration-300"
                                 >
-                                    <span className="font-serif font-bold text-lg sm:text-xl md:text-2xl lg:text-3xl tracking-tight text-[#F2CE85] group-hover:text-[#FFE3A8] drop-shadow-[0_2px_12px_rgba(242,206,133,0.25)] group-hover:drop-shadow-[0_4px_22px_rgba(242,206,133,0.5)] select-none group-hover:scale-105 transition-all duration-300">
+                                    <span className="font-serif font-bold text-base sm:text-xl md:text-2xl lg:text-3xl tracking-tight text-[#F2CE85] group-hover:text-[#FFE3A8] drop-shadow-[0_2px_12px_rgba(242,206,133,0.25)] group-hover:drop-shadow-[0_4px_22px_rgba(242,206,133,0.5)] select-none group-hover:scale-105 transition-all duration-300">
                                         Recruiter
                                     </span>
                                 </button>
@@ -873,7 +873,7 @@ const Home = () => {
             </motion.section>
 
             {/* CTA Banner Styled like Hero */}
-            <motion.div initial={{ opacity: 0, y: 75 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "30px" }} transition={{ duration: 0.85, ease: [0.22, 1, 0.36, 1] }} className={`group/cta mt-16 mx-4 sm:mx-8 lg:mx-16 rounded-3xl overflow-hidden shadow-xl mb-20 relative transition-all duration-700 hover:scale-[1.02] hover:shadow-2xl focus:shadow-2xl h-[450px]`}>
+            <motion.div initial={{ opacity: 0, y: 75 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "30px" }} transition={{ duration: 0.85, ease: [0.22, 1, 0.36, 1] }} className={`group/cta mt-8 sm:mt-16 mx-4 sm:mx-8 lg:mx-16 rounded-2xl sm:rounded-3xl overflow-hidden shadow-xl mb-12 sm:mb-20 relative transition-all duration-700 hover:scale-[1.02] hover:shadow-2xl focus:shadow-2xl h-[280px] sm:h-[360px] md:h-[450px]`}>
                 
                 {/* 1. Full screen background image */}
                 <div 
@@ -882,7 +882,7 @@ const Home = () => {
                 ></div>
 
                 {/* 2. Left white gradient overlay for readability */}
-                <div className="absolute inset-0 bg-gradient-to-r from-white via-white/90 to-transparent z-10 w-2/3 md:w-1/2"></div>
+                <div className="absolute inset-0 bg-gradient-to-r from-white via-white/95 to-transparent z-10 w-full sm:w-2/3 md:w-1/2"></div>
 
                 {/* 3. Right dark diagonal polygon (matching Hero slide 1 style) */}
                 <div className="hidden md:block absolute top-0 right-0 h-full w-1/2 bg-[#020817] z-10" style={{ clipPath: 'polygon(15% 0, 100% 0, 100% 100%, 0% 100%)' }}>
@@ -914,19 +914,19 @@ const Home = () => {
                     </div>
                 </div>
 
-                <div className="absolute inset-0 px-8 md:px-12 lg:px-20 py-16 flex flex-col justify-center z-20">
+                <div className="absolute inset-0 px-5 sm:px-8 md:px-12 lg:px-20 py-6 sm:py-10 md:py-16 flex flex-col justify-center z-20">
                     <div className="w-full md:w-1/2 lg:w-[38%] max-w-lg">
-                        <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900 leading-tight mb-6 tracking-tight">
-                            Start Connecting<br/>With Industry<br/>Today
+                        <h2 className="text-2xl sm:text-3xl md:text-5xl font-extrabold text-gray-900 leading-tight mb-2 sm:mb-4 md:mb-6 tracking-tight">
+                            Start Connecting<br className="hidden sm:inline" /> With Industry<br className="hidden sm:inline" /> Today
                         </h2>
                         
-                        <p className="text-base text-gray-600 font-medium leading-relaxed tracking-wide mb-8">
+                        <p className="text-xs sm:text-sm md:text-base text-gray-600 font-medium leading-relaxed tracking-wide mb-3 sm:mb-6 md:mb-8 line-clamp-2 sm:line-clamp-none">
                             CareerSync bridges the gap between ambition and opportunity. Empower your future with AI-driven insights and instant access to a verified talent pool.
                         </p>
                         
-                        <Link to="/register" className={`inline-flex items-center text-white font-semibold px-8 py-4 text-sm md:text-base rounded-full shadow-xl transition-all duration-300 transform hover:-translate-y-1 bg-blue-900 hover:bg-blue-800 hover:shadow-2xl focus:shadow-2xl`}>
+                        <Link to="/register" className={`inline-flex items-center text-white font-semibold px-5 py-2.5 sm:px-8 sm:py-4 text-xs sm:text-sm md:text-base rounded-full shadow-xl transition-all duration-300 transform hover:-translate-y-1 bg-blue-900 hover:bg-blue-800 hover:shadow-2xl focus:shadow-2xl`}>
                             <span>Get Started Now</span>
-                            <ArrowRight className="w-5 h-5 ml-2" />
+                            <ArrowRight className="w-4 h-4 md:w-5 md:h-5 ml-1.5 md:ml-2" />
                         </Link>
                     </div>
                 </div>
