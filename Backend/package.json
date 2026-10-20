@@ -5,7 +5,10 @@
   "main": "index.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "nodemon server.js"
+    "dev": "nodemon server.js",
+    "seed": "node seeder.js -i",
+    "seed:destroy": "node seeder.js -d",
+    "optimize:indexes": "node scripts/optimizeIndexes.js"
   },
   "keywords": [],
   "author": "",
