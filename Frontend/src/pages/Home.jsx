@@ -16,7 +16,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bot, BookOpen, GraduationCap, Briefcase, Users, CheckCircle, BarChart, UserPlus, FileText, ArrowRight, Cookie, X, ChevronDown } from 'lucide-react';
+import { Bot, BookOpen, GraduationCap, Briefcase, Users, CheckCircle, BarChart, UserPlus, FileText, ArrowRight, Cookie, X, ChevronDown, Search } from 'lucide-react';
+import { roleWorkflows } from '../data/roleWorkflows';
 
 
 const heroSlides = [
@@ -132,6 +133,8 @@ const Home = () => {
     const [openFaq, setOpenFaq] = useState(null);
     const [isPaused, setIsPaused] = useState(false);
     const [isChatOpen, setIsChatOpen] = useState(false);
+    const [showWorkflowModal, setShowWorkflowModal] = useState(false);
+    const [activeWorkflowRole, setActiveWorkflowRole] = useState('student');
 
     useEffect(() => {
         if (window.innerWidth >= 768) return;
@@ -412,19 +415,19 @@ const Home = () => {
             <div className="bg-white py-12 border-b border-gray-100">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center divide-x divide-gray-100">
-                        <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.1 }} className="px-4">
+                        <motion.div initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "20px" }} transition={{ duration: 0.75, delay: 0.1, ease: [0.22, 1, 0.36, 1] }} className="px-4">
                             <h4 className={`text-4xl font-extrabold transition-colors duration-500 mb-2 ${pageStyles[pageTheme].textDark}`}>500+</h4>
                             <p className="text-sm font-medium text-gray-500 uppercase tracking-wide">Top Companies</p>
                         </motion.div>
-                        <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.2 }} className="px-4">
+                        <motion.div initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "20px" }} transition={{ duration: 0.75, delay: 0.2, ease: [0.22, 1, 0.36, 1] }} className="px-4">
                             <h4 className={`text-4xl font-extrabold transition-colors duration-500 mb-2 ${pageStyles[pageTheme].textDark}`}>50+</h4>
                             <p className="text-sm font-medium text-gray-500 uppercase tracking-wide">Universities</p>
                         </motion.div>
-                        <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.3 }} className="px-4">
+                        <motion.div initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "20px" }} transition={{ duration: 0.75, delay: 0.3, ease: [0.22, 1, 0.36, 1] }} className="px-4">
                             <h4 className={`text-4xl font-extrabold transition-colors duration-500 mb-2 ${pageStyles[pageTheme].textDark}`}>25k+</h4>
                             <p className="text-sm font-medium text-gray-500 uppercase tracking-wide">Students Placed</p>
                         </motion.div>
-                        <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.4 }} className="px-4">
+                        <motion.div initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "20px" }} transition={{ duration: 0.75, delay: 0.4, ease: [0.22, 1, 0.36, 1] }} className="px-4">
                             <h4 className={`text-4xl font-extrabold transition-colors duration-500 mb-2 ${pageStyles[pageTheme].textDark}`}>98%</h4>
                             <p className="text-sm font-medium text-gray-500 uppercase tracking-wide">Success Rate</p>
                         </motion.div>
@@ -434,7 +437,7 @@ const Home = () => {
 
             {/* Features Workflow Section */}
 
-            <motion.div initial={{ opacity: 0, y: 50 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "50px" }} transition={{ duration: 0.6 }} id="tour-features" className="bg-gray-50 py-16">
+            <motion.div initial={{ opacity: 0, y: 75 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "30px" }} transition={{ duration: 0.85, ease: [0.22, 1, 0.36, 1] }} id="tour-features" className="bg-gray-50 py-16">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     
                     {/* Timeline Line */}
@@ -560,7 +563,7 @@ const Home = () => {
             </motion.div>
 
             {/* Our Partners Section (Infinite Marquee) */}
-            <motion.div initial={{ opacity: 0, y: 50 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "50px" }} transition={{ duration: 0.6 }} id="tour-marquee" className="bg-gray-100 py-12 border-b border-gray-200 overflow-hidden relative flex flex-col items-center shadow-inner">
+            <motion.div initial={{ opacity: 0, y: 75 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "30px" }} transition={{ duration: 0.85, ease: [0.22, 1, 0.36, 1] }} id="tour-marquee" className="bg-gray-100 py-12 border-b border-gray-200 overflow-hidden relative flex flex-col items-center shadow-inner">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8 text-center z-10">
                     <p id="tour-marquee-container" className="text-sm font-bold tracking-widest text-black uppercase">Trusted by industry leaders & top universities</p>
                 </div>
@@ -633,7 +636,7 @@ const Home = () => {
 
             
             {/* Success Stories / Testimonials */}
-            <motion.div initial={{ opacity: 0, y: 50 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "50px" }} transition={{ duration: 0.6 }} id="tour-testimonials" className="bg-gray-50 py-20 border-t border-gray-100">
+            <motion.div initial={{ opacity: 0, y: 75 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "30px" }} transition={{ duration: 0.85, ease: [0.22, 1, 0.36, 1] }} id="tour-testimonials" className="bg-gray-50 py-20 border-t border-gray-100">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="text-center max-w-3xl mx-auto mb-16">
                         <h2 id="tour-testimonials-heading" className="text-sm font-bold tracking-widest text-black uppercase">
@@ -733,11 +736,94 @@ const Home = () => {
                             </motion.div>
                         </motion.div>
                     </div>
+                    {/* Unified Placement Ecosystem Card with Premium Hover Effects */}
+                    <motion.div 
+                        initial={{ opacity: 0, y: 75 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true, margin: "30px" }}
+                        transition={{ duration: 0.85, ease: [0.22, 1, 0.36, 1] }}
+                        className="mt-12 md:mt-16 relative overflow-hidden rounded-none bg-[#07183d] border border-blue-900/50 hover:border-blue-400/60 shadow-[0_25px_60px_-15px_rgba(2,10,35,0.75)] hover:shadow-[0_30px_80px_-10px_rgba(2,10,35,0.95),0_0_50px_rgba(59,130,246,0.25)] transition-all duration-500 hover:-translate-y-1.5 group/card"
+                    >
+                        {/* Shimmering Top Accent Line on Card Hover */}
+                        <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-blue-400/0 group-hover/card:via-blue-400/80 to-transparent transition-all duration-700 pointer-events-none z-20" />
+
+                        {/* Ambient royal dark blue & warm radial glow */}
+                        <div className="absolute top-1/2 left-[60%] -translate-x-1/2 -translate-y-1/2 w-[540px] h-[380px] bg-gradient-to-r from-blue-600/25 via-indigo-500/15 to-transparent blur-3xl pointer-events-none rounded-full group-hover/card:from-blue-500/35 group-hover/card:scale-110 transition-all duration-700" />
+                        <div className="absolute top-0 right-0 w-80 h-80 bg-blue-500/10 group-hover/card:bg-blue-400/20 blur-2xl pointer-events-none rounded-full transition-all duration-700" />
+
+                        <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center p-8 sm:p-12 md:p-14 lg:p-16">
+                            {/* Left Column: Heading, Description & Action */}
+                            <div className="lg:col-span-6 flex flex-col items-start max-w-xl">
+                                <h3 className="text-3xl sm:text-4xl lg:text-[40px] font-serif font-bold text-white group-hover/card:text-amber-50/95 tracking-tight leading-[1.15] transition-colors duration-300">
+                                    Who should enroll?
+                                </h3>
+                                <p className="mt-4 sm:mt-5 text-sm sm:text-base text-zinc-300 font-normal leading-relaxed">
+                                    An integrated campus placement ecosystem designed for every stakeholder — empowering students, faculty mentors, placement officers, and corporate recruiters.
+                                </p>
+                                <button 
+                                    onClick={() => { setActiveWorkflowRole('student'); setShowWorkflowModal(true); }}
+                                    className="mt-6 sm:mt-8 px-6 py-2.5 rounded-full border border-white/40 hover:border-amber-300 text-white hover:text-amber-200 text-xs sm:text-sm font-medium tracking-wide transition-all duration-300 hover:bg-amber-400/10 hover:shadow-[0_0_20px_rgba(242,206,133,0.25)] active:scale-95 inline-flex items-center gap-2 group cursor-pointer"
+                                >
+                                    <span>How it works</span>
+                                    <ArrowRight className="w-4 h-4 text-amber-300 group-hover:translate-x-1 transition-transform" />
+                                </button>
+                            </div>
+
+                            {/* Right Column: 2x2 Grid of Students, Faculty, TPO, Recruiter */}
+                            <div className="lg:col-span-6 w-full max-w-md mx-auto lg:max-w-none grid grid-cols-2">
+                                {/* Top-Left: Students */}
+                                <button 
+                                    onClick={() => { setActiveWorkflowRole('student'); setShowWorkflowModal(true); }}
+                                    className="border-r border-b border-white/15 py-6 px-4 sm:py-8 sm:px-6 flex items-center justify-center cursor-pointer group hover:bg-amber-400/[0.08] hover:shadow-[inset_0_0_30px_rgba(242,206,133,0.12)] transition-all duration-300"
+                                >
+                                    <span className="font-serif font-bold text-lg sm:text-xl md:text-2xl lg:text-3xl tracking-tight text-[#F2CE85] group-hover:text-[#FFE3A8] drop-shadow-[0_2px_12px_rgba(242,206,133,0.25)] group-hover:drop-shadow-[0_4px_22px_rgba(242,206,133,0.5)] select-none group-hover:scale-105 transition-all duration-300">
+                                        Students
+                                    </span>
+                                </button>
+
+                                {/* Top-Right: Faculty */}
+                                <button 
+                                    onClick={() => { setActiveWorkflowRole('faculty'); setShowWorkflowModal(true); }}
+                                    className="border-b border-white/15 py-6 px-4 sm:py-8 sm:px-6 flex items-center justify-center cursor-pointer group hover:bg-amber-400/[0.08] hover:shadow-[inset_0_0_30px_rgba(242,206,133,0.12)] transition-all duration-300"
+                                >
+                                    <span className="font-serif font-bold text-lg sm:text-xl md:text-2xl lg:text-3xl tracking-tight text-[#F2CE85] group-hover:text-[#FFE3A8] drop-shadow-[0_2px_12px_rgba(242,206,133,0.25)] group-hover:drop-shadow-[0_4px_22px_rgba(242,206,133,0.5)] select-none group-hover:scale-105 transition-all duration-300">
+                                        Faculty
+                                    </span>
+                                </button>
+
+                                {/* Bottom-Left: TPO */}
+                                <button 
+                                    onClick={() => { setActiveWorkflowRole('tpo'); setShowWorkflowModal(true); }}
+                                    className="border-r border-white/15 py-6 px-4 sm:py-8 sm:px-6 flex items-center justify-center cursor-pointer group hover:bg-amber-400/[0.08] hover:shadow-[inset_0_0_30px_rgba(242,206,133,0.12)] transition-all duration-300"
+                                >
+                                    <span className="font-serif font-bold text-lg sm:text-xl md:text-2xl lg:text-3xl tracking-tight text-[#F2CE85] group-hover:text-[#FFE3A8] drop-shadow-[0_2px_12px_rgba(242,206,133,0.25)] group-hover:drop-shadow-[0_4px_22px_rgba(242,206,133,0.5)] select-none group-hover:scale-105 transition-all duration-300">
+                                        TPO
+                                    </span>
+                                </button>
+
+                                {/* Bottom-Right: Recruiter */}
+                                <button 
+                                    onClick={() => { setActiveWorkflowRole('recruiter'); setShowWorkflowModal(true); }}
+                                    className="py-6 px-4 sm:py-8 sm:px-6 flex items-center justify-center cursor-pointer group hover:bg-amber-400/[0.08] hover:shadow-[inset_0_0_30px_rgba(242,206,133,0.12)] transition-all duration-300"
+                                >
+                                    <span className="font-serif font-bold text-lg sm:text-xl md:text-2xl lg:text-3xl tracking-tight text-[#F2CE85] group-hover:text-[#FFE3A8] drop-shadow-[0_2px_12px_rgba(242,206,133,0.25)] group-hover:drop-shadow-[0_4px_22px_rgba(242,206,133,0.5)] select-none group-hover:scale-105 transition-all duration-300">
+                                        Recruiter
+                                    </span>
+                                </button>
+                            </div>
+                        </div>
+                    </motion.div>
                 </div>
             </motion.div>
 
             {/* FAQ Section */}
-            <section className="py-24 bg-slate-50 relative overflow-hidden">
+            <motion.section 
+                initial={{ opacity: 0, y: 75 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "30px" }}
+                transition={{ duration: 0.85, ease: [0.22, 1, 0.36, 1] }}
+                className="py-24 bg-slate-50 relative overflow-hidden"
+            >
                 <div className="max-w-4xl mx-auto px-4 md:px-8 relative z-10">
                     <div className="text-center max-w-3xl mx-auto mb-16">
                         <h2 className="text-sm font-bold tracking-widest text-black uppercase">
@@ -784,10 +870,10 @@ const Home = () => {
                         ))}
                     </div>
                 </div>
-            </section>
+            </motion.section>
 
             {/* CTA Banner Styled like Hero */}
-            <motion.div initial={{ opacity: 0, y: 50 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "50px" }} transition={{ duration: 0.6 }} className={`group/cta mt-16 mx-4 sm:mx-8 lg:mx-16 rounded-3xl overflow-hidden shadow-xl mb-20 relative transition-all duration-700 hover:scale-[1.02] hover:shadow-2xl focus:shadow-2xl h-[450px]`}>
+            <motion.div initial={{ opacity: 0, y: 75 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "30px" }} transition={{ duration: 0.85, ease: [0.22, 1, 0.36, 1] }} className={`group/cta mt-16 mx-4 sm:mx-8 lg:mx-16 rounded-3xl overflow-hidden shadow-xl mb-20 relative transition-all duration-700 hover:scale-[1.02] hover:shadow-2xl focus:shadow-2xl h-[450px]`}>
                 
                 {/* 1. Full screen background image */}
                 <div 
@@ -1087,6 +1173,142 @@ const Home = () => {
 
 
 
+                </div>
+            )}
+        </AnimatePresence>        {/* Role Workflow Modal ("How it works") */}
+        <AnimatePresence>
+            {showWorkflowModal && (
+                <div className="fixed inset-0 z-[200] flex items-center justify-center p-3 sm:p-4 md:p-6 bg-black/75 backdrop-blur-md">
+                    <motion.div 
+                        initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                        transition={{ duration: 0.3 }}
+                        className="relative w-full max-w-4xl bg-white border border-gray-200 shadow-[0_25px_70px_rgba(0,0,0,0.35)] rounded-2xl md:rounded-3xl flex flex-col max-h-[90vh] overflow-hidden"
+                    >
+                        {/* Header */}
+                        <div className="p-5 sm:p-6 md:p-7 border-b border-gray-100 flex items-start justify-between bg-gradient-to-r from-gray-50 via-white to-gray-50">
+                            <div>
+                                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold bg-amber-50 text-amber-900 border border-amber-200/60 mb-2">
+                                    <span>Stakeholder Lifecycle & Operations</span>
+                                </div>
+                                <h3 className="text-xl sm:text-2xl md:text-3xl font-serif font-bold text-gray-900 tracking-tight">
+                                    How CareerSync Works
+                                </h3>
+                                <p className="text-xs sm:text-sm text-gray-500 mt-1 max-w-xl">
+                                    Select any role below to view their step-by-step end-to-end placement workflow.
+                                </p>
+                            </div>
+                            <button 
+                                onClick={() => setShowWorkflowModal(false)}
+                                className="p-2 text-gray-400 hover:text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors flex-shrink-0 cursor-pointer"
+                            >
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
+
+                        {/* Role Tabs */}
+                        <div className="px-5 sm:px-7 pt-4 pb-3 border-b border-gray-100 bg-white flex items-center gap-2 overflow-x-auto">
+                            {[
+                                { id: 'student', label: 'Students', icon: GraduationCap },
+                                { id: 'faculty', label: 'Faculty', icon: BookOpen },
+                                { id: 'tpo', label: 'TPO (Placement)', icon: Briefcase },
+                                { id: 'recruiter', label: 'Recruiter', icon: Users },
+                            ].map((roleTab) => {
+                                const IconComponent = roleTab.icon;
+                                const isActive = activeWorkflowRole === roleTab.id;
+                                return (
+                                    <button
+                                        key={roleTab.id}
+                                        onClick={() => setActiveWorkflowRole(roleTab.id)}
+                                        className={`flex items-center gap-2 px-4 py-2 text-xs sm:text-sm font-semibold rounded-xl whitespace-nowrap transition-all duration-200 cursor-pointer ${
+                                            isActive
+                                                ? 'bg-gray-900 text-white shadow-md shadow-black/10 scale-[1.02]'
+                                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-900'
+                                        }`}
+                                    >
+                                        <IconComponent className={`w-4 h-4 ${isActive ? 'text-[#F2CE85]' : 'text-gray-500'}`} />
+                                        <span>{roleTab.label}</span>
+                                    </button>
+                                );
+                            })}
+                        </div>
+
+                        {/* Active Role Content Body */}
+                        <div className="p-5 sm:p-7 md:p-8 overflow-y-auto flex-1 bg-gray-50/60">
+                            {roleWorkflows[activeWorkflowRole] && (
+                                <div>
+                                    {/* Role Banner */}
+                                    <div className="bg-white border border-gray-200/80 rounded-2xl p-5 sm:p-6 mb-6 shadow-xs">
+                                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-2">
+                                            <h4 className="text-lg sm:text-xl font-serif font-bold text-gray-900">
+                                                {roleWorkflows[activeWorkflowRole].title}
+                                            </h4>
+                                            <span className={`inline-flex items-center text-[11px] font-bold px-3 py-1 rounded-full border self-start sm:self-auto ${roleWorkflows[activeWorkflowRole].badgeColor}`}>
+                                                {roleWorkflows[activeWorkflowRole].badge}
+                                            </span>
+                                        </div>
+                                        <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">
+                                            {roleWorkflows[activeWorkflowRole].summary}
+                                        </p>
+                                    </div>
+
+                                    {/* Workflow Steps Timeline */}
+                                    <div className="space-y-4">
+                                        {roleWorkflows[activeWorkflowRole].steps.map((st, idx) => (
+                                            <div 
+                                                key={idx}
+                                                className="bg-white border border-gray-200/80 hover:border-gray-300 rounded-2xl p-4 sm:p-5 shadow-xs transition-all duration-200 flex items-start gap-4"
+                                            >
+                                                {/* Step Number Badge */}
+                                                <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gray-900 text-white font-bold text-xs sm:text-sm flex items-center justify-center flex-shrink-0 shadow-sm mt-0.5">
+                                                    {st.step}
+                                                </div>
+
+                                                {/* Step Details */}
+                                                <div className="flex-1 min-w-0">
+                                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-1.5">
+                                                        <h5 className="text-sm sm:text-base font-bold text-gray-900">
+                                                            {st.title}
+                                                        </h5>
+                                                        <span className="text-[10px] font-semibold text-gray-500 bg-gray-100 px-2 py-0.5 rounded self-start sm:self-auto">
+                                                            {st.highlight}
+                                                        </span>
+                                                    </div>
+                                                    <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">
+                                                        {st.description}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Footer */}
+                        <div className="p-4 px-6 sm:px-7 border-t border-gray-100 bg-white flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-500">
+                            <span className="text-center sm:text-left">
+                                Role: <strong className="text-gray-900">{roleWorkflows[activeWorkflowRole]?.roleName}</strong> • {roleWorkflows[activeWorkflowRole]?.steps?.length} Stages Workflow
+                            </span>
+                            <div className="flex items-center gap-3 w-full sm:w-auto">
+                                <Link
+                                    to={activeWorkflowRole === 'student' ? '/register' : '/login'}
+                                    onClick={() => setShowWorkflowModal(false)}
+                                    className="flex-1 sm:flex-none px-5 py-2 bg-gray-900 hover:bg-black text-white font-medium rounded-xl transition-all text-center inline-flex items-center justify-center gap-1.5"
+                                >
+                                    <span>Enter Portal</span>
+                                    <ArrowRight className="w-3.5 h-3.5" />
+                                </Link>
+                                <button
+                                    onClick={() => setShowWorkflowModal(false)}
+                                    className="px-5 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-xl transition-all cursor-pointer"
+                                >
+                                    Close
+                                </button>
+                            </div>
+                        </div>
+                    </motion.div>
                 </div>
             )}
         </AnimatePresence>
