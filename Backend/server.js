@@ -44,6 +44,7 @@ app.use('/api/opportunities', require('./routes/opportunityRoutes'));
 app.use('/api/analytics', require('./routes/analyticsRoutes'));
 app.use('/api/chat', require('./routes/chatRoutes'));
 app.use('/api/assessments', require('./routes/assessmentRoutes'));
+app.use('/api/learning', require('./routes/learningRoutes'));
 
 app.get('/', (req, res) => {
     res.send('API is running...');
