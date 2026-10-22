@@ -1,25 +1,47 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import api from '../../services/api';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
-
-
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
     User, BookOpen, Code, Award, Briefcase, FileText, 
-    CheckCircle, ChevronRight, ChevronLeft, Upload, Plus, Trash2, Download
+    CheckCircle, ChevronRight, ChevronLeft, Plus, Trash2, Download, Save, Sparkles, MapPin, Target
 } from 'lucide-react';
+import { AuthContext } from '../../context/AuthContext';
 
 const ProfileBuilder = () => {
+    const { user } = useContext(AuthContext);
     const [currentStep, setCurrentStep] = useState(1);
-    
+    const [isSaving, setIsSaving] = useState(false);
+    const [message, setMessage] = useState({ text: '', type: '' });
+
     // Form State
     const [formData, setFormData] = useState({
-        personal: { phone: '', portfolioUrl: '', githubUrl: '', linkedinUrl: '' },
-        academic: { college: '', department: '', semester: '', graduationYear: '', cgpa: '' },
-        skills: [{ name: '', level: 'Beginner', category: 'Technical' }],
-        projects: [{ title: '', description: '', technologiesUsed: '', githubUrl: '' }],
-        career: { targetRoles: '', preferredLocations: '' }
+        personal: { 
+            name: user?.name || '',
+            phone: '', 
+            portfolioUrl: '', 
+            githubUrl: '', 
+            linkedinUrl: '' 
+        },
+        academic: { 
+            college: '', 
+            department: '', 
+            semester: '', 
+            graduationYear: '', 
+            cgpa: '' 
+        },
+        skills: [
+            { name: 'JavaScript', level: 'Intermediate', category: 'Technical' },
+            { name: 'React.js', level: 'Intermediate', category: 'Technical' }
+        ],
+        projects: [
+            { title: '', description: '', technologiesUsed: '', githubUrl: '', liveUrl: '' }
+        ],
+        career: { 
+            targetRoles: 'Full Stack Developer', 
+            preferredLocations: 'Remote, Bengaluru' 
+        }
     });
 
     const updateField = (section, field, value) => {
@@ -44,41 +66,90 @@ const ProfileBuilder = () => {
         setFormData(prev => ({ ...prev, [section]: newArray }));
     };
 
-    
-    const [isSaving, setIsSaving] = useState(false);
-    const [message, setMessage] = useState({ text: '', type: '' });
-
     useEffect(() => {
         const fetchProfile = async () => {
             try {
                 const res = await api.get('/profile/me');
-                if (res.data.success && res.data.data) {
+                if (res.data?.success && res.data?.data) {
                     const dbProfile = res.data.data;
                     setFormData({
-                        personal: dbProfile.personalInfo || { phone: '', portfolioUrl: '', githubUrl: '', linkedinUrl: '' },
+                        personal: {
+                            name: dbProfile.user?.name || user?.name || '',
+                            phone: dbProfile.personalInfo?.phone || '',
+                            portfolioUrl: dbProfile.personalInfo?.portfolioUrl || '',
+                            githubUrl: dbProfile.personalInfo?.githubUrl || '',
+                            linkedinUrl: dbProfile.personalInfo?.linkedinUrl || ''
+                        },
                         academic: dbProfile.academicInfo || { college: '', department: '', semester: '', graduationYear: '', cgpa: '' },
-                        skills: dbProfile.skills && dbProfile.skills.length > 0 ? dbProfile.skills : [{ name: '', level: 'Beginner', category: 'Technical' }],
-                        projects: dbProfile.projects && dbProfile.projects.length > 0 ? dbProfile.projects.map(p => ({...p, technologiesUsed: p.technologiesUsed ? p.technologiesUsed.join(', ') : ''})) : [{ title: '', description: '', technologiesUsed: '', githubUrl: '' }],
-                        career: dbProfile.careerInterests || { targetRoles: '', preferredLocations: '' }
+                        skills: dbProfile.skills && dbProfile.skills.length > 0 ? dbProfile.skills : [
+                            { name: 'JavaScript', level: 'Intermediate', category: 'Technical' },
+                            { name: 'React.js', level: 'Intermediate', category: 'Technical' }
+                        ],
+                        projects: dbProfile.projects && dbProfile.projects.length > 0 
+                            ? dbProfile.projects.map(p => ({
+                                ...p, 
+                                technologiesUsed: Array.isArray(p.technologiesUsed) ? p.technologiesUsed.join(', ') : (p.technologiesUsed || '')
+                            })) 
+                            : [{ title: '', description: '', technologiesUsed: '', githubUrl: '', liveUrl: '' }],
+                        career: dbProfile.careerInterests || { targetRoles: 'Full Stack Developer', preferredLocations: 'Remote' }
                     });
                 }
             } catch (err) {
-                console.log("No profile exists yet or error fetching.");
+                console.log("No existing profile or error fetching profile:", err);
             }
         };
         fetchProfile();
-    }, []);
+    }, [user]);
 
-    
+    const saveProfile = async () => {
+        setIsSaving(true);
+        setMessage({ text: '', type: '' });
+        try {
+            const processedProjects = formData.projects
+                .filter(p => p.title?.trim())
+                .map(p => ({
+                    ...p,
+                    technologiesUsed: typeof p.technologiesUsed === 'string' 
+                        ? p.technologiesUsed.split(',').map(s => s.trim()).filter(Boolean) 
+                        : (p.technologiesUsed || [])
+                }));
+
+            const payload = {
+                personalInfo: formData.personal,
+                academicInfo: formData.academic,
+                skills: formData.skills.filter(s => s.name?.trim()),
+                projects: processedProjects,
+                careerInterests: formData.career
+            };
+
+            const res = await api.post('/profile', payload);
+            if (res.data?.success) {
+                setMessage({ text: 'Profile successfully updated and synchronized!', type: 'success' });
+            }
+        } catch (err) {
+            setMessage({ 
+                text: err.response?.data?.message || 'Failed to save profile. Please check your connection.', 
+                type: 'error' 
+            });
+        } finally {
+            setIsSaving(false);
+            setTimeout(() => setMessage({ text: '', type: '' }), 5000);
+        }
+    };
+
     const generateResumePDF = async () => {
-        const input = document.getElementById('resume-preview');
+        const input = document.getElementById('resume-pdf-template');
         if (!input) return;
         
         try {
-            // Un-hide the preview for rendering
+            // Temporarily position visible for canvas capture
             input.style.display = 'block';
-            
-            const canvas = await html2canvas(input, { scale: 2 });
+            input.style.position = 'absolute';
+            input.style.left = '0px';
+            input.style.top = '0px';
+            input.style.zIndex = '9999';
+
+            const canvas = await html2canvas(input, { scale: 2, useCORS: true });
             const imgData = canvas.toDataURL('image/png');
             
             const pdf = new jsPDF('p', 'mm', 'a4');
@@ -88,224 +159,272 @@ const ProfileBuilder = () => {
             pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
             pdf.save(`${formData.personal.name || 'Student'}_Resume.pdf`);
             
-            // Hide it back
+            // Re-hide
             input.style.display = 'none';
         } catch (err) {
             console.error("PDF Generation Error", err);
-        }
-    };
-
-    const saveProfile = async () => {
-        setIsSaving(true);
-        setMessage({ text: '', type: '' });
-        try {
-            
-            const processedProjects = formData.projects.map(p => ({
-                ...p,
-                technologiesUsed: typeof p.technologiesUsed === 'string' ? p.technologiesUsed.split(',').map(s => s.trim()).filter(Boolean) : p.technologiesUsed
-            }));
-
-            const payload = {
-                personalInfo: formData.personal,
-                academicInfo: formData.academic,
-                skills: formData.skills,
-                projects: processedProjects,
-                careerInterests: formData.career
-            };
-
-            const res = await api.post('/profile', payload);
-            if (res.data.success) {
-                setMessage({ text: 'Profile saved successfully!', type: 'success' });
-            }
-        } catch (err) {
-            setMessage({ text: 'Failed to save profile. Please try again.', type: 'error' });
-        } finally {
-            setIsSaving(false);
-            setTimeout(() => setMessage({ text: '', type: '' }), 5000);
+            setMessage({ text: 'Error generating PDF. Please try again.', type: 'error' });
         }
     };
 
     const steps = [
         { num: 1, title: 'Personal & Academic', icon: User },
-        { num: 2, title: 'Skills & Experience', icon: Code },
+        { num: 2, title: 'Skills & Proficiencies', icon: Code },
         { num: 3, title: 'Projects & Career', icon: Briefcase },
-        { num: 4, title: 'Resume Generator', icon: FileText }
+        { num: 4, title: 'Review & Resume', icon: FileText }
     ];
 
     const nextStep = () => setCurrentStep(prev => Math.min(prev + 1, 4));
     const prevStep = () => setCurrentStep(prev => Math.max(prev - 1, 1));
 
-    
-            {/* HIDDEN RESUME PREVIEW FOR PDF GENERATION */}
-            <div id="resume-preview" className="hidden bg-white text-black p-10 w-[800px] absolute -left-[9999px]">
-                <h1 className="text-4xl font-medium border-b-2 border-black pb-2 mb-4">{formData.personal.name || 'Student Name'}</h1>
-                <p className="mb-6">{formData.personal.linkedinUrl} | {formData.personal.githubUrl}</p>
-                
-                <h2 className="text-2xl font-medium mb-2">Education</h2>
-                <div className="mb-6">
-                    <p className="font-medium">{formData.academic.college}</p>
-                    <p>{formData.academic.department} | CGPA: {formData.academic.cgpa}</p>
-                </div>
-                
-                <h2 className="text-2xl font-medium mb-2">Technical Skills</h2>
-                <div className="mb-6">
-                    {formData.skills.filter(s => s.category === 'Technical').map(s => s.name).join(', ')}
-                </div>
-
-                <h2 className="text-2xl font-medium mb-2">Projects</h2>
-                <div className="mb-6">
-                    {formData.projects.map((p, i) => (
-                        <div key={i} className="mb-3">
-                            <p className="font-medium">{p.title}</p>
-                            <p className="italic text-sm text-gray-600 mb-1">{typeof p.technologiesUsed === 'string' ? p.technologiesUsed : p.technologiesUsed?.join(', ')}</p>
-                            <p>{p.description}</p>
-                        </div>
-                    ))}
-                </div>
-            </div>
-
     return (
         <div className="max-w-5xl mx-auto pb-12">
-            {/* Header & Progress */}
-            <div className="mb-8">
-                <h2 className="text-3xl font-medium text-gray-800 mb-2">Digital Profile Builder</h2>
-                <p className="text-gray-600 text-sm">Complete your profile to unlock AI-driven skill gaps and internships.</p>
-                
-                <div className="flex justify-between items-center mt-8 relative">
-                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-full h-1 bg-gray-800 rounded-full z-0"></div>
-                    <div className="absolute left-0 top-1/2 -translate-y-1/2 h-1 bg-blue-500 rounded-full z-0 transition-all duration-500" style={{ width: `${((currentStep - 1) / 3) * 100}%` }}></div>
-                    
-                    {steps.map((step) => {
-                        const Icon = step.icon;
-                        const isActive = currentStep >= step.num;
-                        const isCurrent = currentStep === step.num;
-                        
-                        
-            {/* HIDDEN RESUME PREVIEW FOR PDF GENERATION */}
-            <div id="resume-preview" className="hidden bg-white text-black p-10 w-[800px] absolute -left-[9999px]">
-                <h1 className="text-4xl font-medium border-b-2 border-black pb-2 mb-4">{formData.personal.name || 'Student Name'}</h1>
-                <p className="mb-6">{formData.personal.linkedinUrl} | {formData.personal.githubUrl}</p>
-                
-                <h2 className="text-2xl font-medium mb-2">Education</h2>
-                <div className="mb-6">
-                    <p className="font-medium">{formData.academic.college}</p>
-                    <p>{formData.academic.department} | CGPA: {formData.academic.cgpa}</p>
+            {/* Header & Actions */}
+            <div className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <h2 className="text-3xl font-bold text-gray-900 tracking-tight">Digital Profile Builder</h2>
+                    <p className="text-gray-600 text-sm mt-1">Complete your profile to unlock automated ATS scoring, skill matching, and verified badges.</p>
                 </div>
                 
-                <h2 className="text-2xl font-medium mb-2">Technical Skills</h2>
-                <div className="mb-6">
-                    {formData.skills.filter(s => s.category === 'Technical').map(s => s.name).join(', ')}
-                </div>
-
-                <h2 className="text-2xl font-medium mb-2">Projects</h2>
-                <div className="mb-6">
-                    {formData.projects.map((p, i) => (
-                        <div key={i} className="mb-3">
-                            <p className="font-medium">{p.title}</p>
-                            <p className="italic text-sm text-gray-600 mb-1">{typeof p.technologiesUsed === 'string' ? p.technologiesUsed : p.technologiesUsed?.join(', ')}</p>
-                            <p>{p.description}</p>
-                        </div>
-                    ))}
+                <div className="flex items-center gap-3">
+                    <button 
+                        onClick={saveProfile} 
+                        disabled={isSaving}
+                        className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 shadow-sm transition-all active:scale-95 disabled:opacity-50"
+                    >
+                        <Save className="w-4 h-4 mr-2" />
+                        {isSaving ? 'Saving...' : 'Save Profile'}
+                    </button>
                 </div>
             </div>
 
-    return (
-                            <div key={step.num} className="relative z-10 flex flex-col items-center group">
-                                <div className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all duration-300 ${
-                                    isActive ? 'bg-blue-600 border-blue-500 text-gray-800 shadow-sm' : 'bg-white border-gray-200 text-gray-500'
+            {/* Notification alert */}
+            {message.text && (
+                <div className={`mb-6 p-4 rounded-lg text-sm font-medium flex items-center justify-between border ${
+                    message.type === 'success' 
+                        ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
+                        : 'bg-red-50 text-red-700 border-red-200'
+                }`}>
+                    <span>{message.text}</span>
+                    <button onClick={() => setMessage({ text: '', type: '' })} className="text-xs uppercase font-bold underline ml-4">Dismiss</button>
+                </div>
+            )}
+
+            {/* Stepper Wizard Progress */}
+            <div className="relative mb-10 pt-2">
+                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-full h-1 bg-gray-200 rounded-full z-0"></div>
+                <div 
+                    className="absolute left-0 top-1/2 -translate-y-1/2 h-1 bg-blue-600 rounded-full z-0 transition-all duration-300"
+                    style={{ width: `${((currentStep - 1) / 3) * 100}%` }}
+                ></div>
+
+                <div className="flex justify-between items-center relative z-10">
+                    {steps.map((step) => {
+                        const Icon = step.icon;
+                        const isDone = currentStep > step.num;
+                        const isCurrent = currentStep === step.num;
+                        return (
+                            <button
+                                key={step.num}
+                                onClick={() => setCurrentStep(step.num)}
+                                className="flex flex-col items-center group cursor-pointer focus:outline-none"
+                            >
+                                <div className={`w-11 h-11 rounded-full flex items-center justify-center font-bold text-sm transition-all duration-200 shadow-sm ${
+                                    isDone
+                                        ? 'bg-blue-600 text-white border-2 border-blue-600 ring-4 ring-blue-100'
+                                        : isCurrent
+                                        ? 'bg-blue-600 text-white border-2 border-blue-600 ring-4 ring-blue-100 shadow-md scale-105'
+                                        : 'bg-white text-gray-500 border-2 border-gray-300 hover:border-blue-400'
                                 }`}>
-                                    
+                                    {isDone ? <CheckCircle className="w-5 h-5" /> : <Icon className="w-5 h-5" />}
                                 </div>
-                                <span className={`absolute -bottom-6 whitespace-nowrap text-xs font-semibold ${isActive ? 'text-blue-400' : 'text-gray-600'}`}>
+                                <span className={`mt-2 text-xs font-semibold tracking-wide ${
+                                    isCurrent ? 'text-blue-700 font-bold' : isDone ? 'text-gray-700' : 'text-gray-400'
+                                }`}>
                                     {step.title}
                                 </span>
-                            </div>
+                            </button>
                         );
                     })}
                 </div>
             </div>
 
-            {/* Form Content */}
-            <div className="bg-white border border-blue-100 rounded-lg p-8 shadow-2xl mt-12 relative overflow-hidden">
+            {/* Step Content Container */}
+            <div className="bg-white border border-blue-100 rounded-xl p-8 shadow-sm relative overflow-hidden">
                 <AnimatePresence mode="wait">
                     <motion.div
                         key={currentStep}
-                        initial={{ opacity: 0, x: 20 }}
+                        initial={{ opacity: 0, x: 15 }}
                         animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: -20 }}
+                        exit={{ opacity: 0, x: -15 }}
                         transition={{ duration: 0.2 }}
                     >
-                        {/* STEP 1: ACADEMIC */}
+                        {/* STEP 1: PERSONAL & ACADEMIC */}
                         {currentStep === 1 && (
                             <div className="space-y-6">
-                                <h3 className="text-xl font-medium text-gray-800 mb-6 flex items-center">
-                                     Academic Information
-                                </h3>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div className="border-b border-gray-100 pb-4 mb-6">
+                                    <h3 className="text-lg font-bold text-gray-900 flex items-center">
+                                        <User className="w-5 h-5 mr-2 text-blue-600" />
+                                        Personal & Contact Information
+                                    </h3>
+                                    <p className="text-xs text-gray-500 mt-1">Provide your primary contact links so recruiters can reach you directly.</p>
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                                     <div>
-                                        <label className="block text-gray-600 text-xs font-medium mb-2 font-medium">College / University</label>
-                                        <input type="text" className="w-full bg-gray-50 border border-gray-200 text-gray-800 rounded-lg px-4 py-3 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all" placeholder="Enter your institution" value={formData.academic.college} onChange={e => updateField('academic', 'college', e.target.value)} />
+                                        <label className="block text-gray-700 text-xs font-semibold mb-1.5">Full Name</label>
+                                        <input 
+                                            type="text" 
+                                            className="w-full bg-gray-50 border border-gray-200 text-gray-900 rounded-lg px-4 py-2.5 text-sm focus:bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all" 
+                                            placeholder="John Doe" 
+                                            value={formData.personal.name} 
+                                            onChange={e => updateField('personal', 'name', e.target.value)} 
+                                        />
                                     </div>
                                     <div>
-                                        <label className="block text-gray-600 text-xs font-medium mb-2 font-medium">Department / Branch</label>
-                                        <input type="text" className="w-full bg-gray-50 border border-gray-200 text-gray-800 rounded-lg px-4 py-3 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all" placeholder="e.g. Computer Science" value={formData.academic.department} onChange={e => updateField('academic', 'department', e.target.value)} />
+                                        <label className="block text-gray-700 text-xs font-semibold mb-1.5">Phone Number</label>
+                                        <input 
+                                            type="tel" 
+                                            className="w-full bg-gray-50 border border-gray-200 text-gray-900 rounded-lg px-4 py-2.5 text-sm focus:bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all" 
+                                            placeholder="+91 9876543210" 
+                                            value={formData.personal.phone} 
+                                            onChange={e => updateField('personal', 'phone', e.target.value)} 
+                                        />
                                     </div>
                                     <div>
-                                        <label className="block text-gray-600 text-xs font-medium mb-2 font-medium">Semester / Year</label>
-                                        <input type="text" className="w-full bg-gray-50 border border-gray-200 text-gray-800 rounded-lg px-4 py-3 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all" placeholder="e.g. 6th Semester" value={formData.academic.semester} onChange={e => updateField('academic', 'semester', e.target.value)} />
+                                        <label className="block text-gray-700 text-xs font-semibold mb-1.5">LinkedIn Profile URL</label>
+                                        <input 
+                                            type="url" 
+                                            className="w-full bg-gray-50 border border-gray-200 text-gray-900 rounded-lg px-4 py-2.5 text-sm focus:bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all" 
+                                            placeholder="https://linkedin.com/in/username" 
+                                            value={formData.personal.linkedinUrl} 
+                                            onChange={e => updateField('personal', 'linkedinUrl', e.target.value)} 
+                                        />
                                     </div>
                                     <div>
-                                        <label className="block text-gray-600 text-xs font-medium mb-2 font-medium">Current CGPA</label>
-                                        <input type="text" className="w-full bg-gray-50 border border-gray-200 text-gray-800 rounded-lg px-4 py-3 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all" placeholder="e.g. 8.5" value={formData.academic.cgpa} onChange={e => updateField('academic', 'cgpa', e.target.value)} />
+                                        <label className="block text-gray-700 text-xs font-semibold mb-1.5">GitHub Profile URL</label>
+                                        <input 
+                                            type="url" 
+                                            className="w-full bg-gray-50 border border-gray-200 text-gray-900 rounded-lg px-4 py-2.5 text-sm focus:bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all" 
+                                            placeholder="https://github.com/username" 
+                                            value={formData.personal.githubUrl} 
+                                            onChange={e => updateField('personal', 'githubUrl', e.target.value)} 
+                                        />
                                     </div>
                                 </div>
 
-                                <h3 className="text-xl font-medium text-gray-800 mb-6 mt-8 flex items-center">
-                                     Digital Links
-                                </h3>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div>
-                                        <label className="block text-gray-600 text-xs font-medium mb-2 font-medium">LinkedIn URL</label>
-                                        <input type="url" className="w-full bg-gray-50 border border-gray-200 text-gray-800 rounded-lg px-4 py-3 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all" placeholder="https://linkedin.com/in/..." value={formData.personal.linkedinUrl} onChange={e => updateField('personal', 'linkedinUrl', e.target.value)} />
+                                <div className="border-b border-gray-100 pb-4 pt-6 mb-6">
+                                    <h3 className="text-lg font-bold text-gray-900 flex items-center">
+                                        <BookOpen className="w-5 h-5 mr-2 text-blue-600" />
+                                        Academic Credentials
+                                    </h3>
+                                    <p className="text-xs text-gray-500 mt-1">Institutions and current academic metrics.</p>
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                    <div className="md:col-span-2">
+                                        <label className="block text-gray-700 text-xs font-semibold mb-1.5">College / University</label>
+                                        <input 
+                                            type="text" 
+                                            className="w-full bg-gray-50 border border-gray-200 text-gray-900 rounded-lg px-4 py-2.5 text-sm focus:bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all" 
+                                            placeholder="Indian Institute of Technology / State University" 
+                                            value={formData.academic.college} 
+                                            onChange={e => updateField('academic', 'college', e.target.value)} 
+                                        />
                                     </div>
                                     <div>
-                                        <label className="block text-gray-600 text-xs font-medium mb-2 font-medium">GitHub URL</label>
-                                        <input type="url" className="w-full bg-gray-50 border border-gray-200 text-gray-800 rounded-lg px-4 py-3 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all" placeholder="https://github.com/..." value={formData.personal.githubUrl} onChange={e => updateField('personal', 'githubUrl', e.target.value)} />
+                                        <label className="block text-gray-700 text-xs font-semibold mb-1.5">Department / Major</label>
+                                        <input 
+                                            type="text" 
+                                            className="w-full bg-gray-50 border border-gray-200 text-gray-900 rounded-lg px-4 py-2.5 text-sm focus:bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all" 
+                                            placeholder="Computer Science & Engineering" 
+                                            value={formData.academic.department} 
+                                            onChange={e => updateField('academic', 'department', e.target.value)} 
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-gray-700 text-xs font-semibold mb-1.5">Current Semester</label>
+                                        <input 
+                                            type="text" 
+                                            className="w-full bg-gray-50 border border-gray-200 text-gray-900 rounded-lg px-4 py-2.5 text-sm focus:bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all" 
+                                            placeholder="6th Semester" 
+                                            value={formData.academic.semester} 
+                                            onChange={e => updateField('academic', 'semester', e.target.value)} 
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-gray-700 text-xs font-semibold mb-1.5">Expected Graduation Year</label>
+                                        <input 
+                                            type="text" 
+                                            className="w-full bg-gray-50 border border-gray-200 text-gray-900 rounded-lg px-4 py-2.5 text-sm focus:bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all" 
+                                            placeholder="2026" 
+                                            value={formData.academic.graduationYear} 
+                                            onChange={e => updateField('academic', 'graduationYear', e.target.value)} 
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-gray-700 text-xs font-semibold mb-1.5">CGPA / Percentage</label>
+                                        <input 
+                                            type="text" 
+                                            className="w-full bg-gray-50 border border-gray-200 text-gray-900 rounded-lg px-4 py-2.5 text-sm focus:bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all" 
+                                            placeholder="8.75 / 10" 
+                                            value={formData.academic.cgpa} 
+                                            onChange={e => updateField('academic', 'cgpa', e.target.value)} 
+                                        />
                                     </div>
                                 </div>
                             </div>
                         )}
 
-                        {/* STEP 2: SKILLS */}
+                        {/* STEP 2: SKILLS & PROFICIENCIES */}
                         {currentStep === 2 && (
                             <div className="space-y-6">
-                                <div className="flex justify-between items-center mb-6">
-                                    <h3 className="text-xl font-medium text-gray-800 flex items-center">
-                                         Technical & Soft Skills
-                                    </h3>
-                                    <button onClick={() => addArrayItem('skills', { name: '', level: 'Beginner', category: 'Technical' })} className="flex items-center text-xs font-medium text-purple-400 hover:text-purple-300 bg-purple-900/30 px-3 py-1.5 rounded-md transition-colors">
-                                         ADD SKILL
+                                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-gray-100 pb-4 mb-6">
+                                    <div>
+                                        <h3 className="text-lg font-bold text-gray-900 flex items-center">
+                                            <Code className="w-5 h-5 mr-2 text-purple-600" />
+                                            Skills Inventory
+                                        </h3>
+                                        <p className="text-xs text-gray-500 mt-1">List technical programming languages, frameworks, and domain knowledge.</p>
+                                    </div>
+                                    <button 
+                                        onClick={() => addArrayItem('skills', { name: '', level: 'Intermediate', category: 'Technical' })} 
+                                        className="flex items-center text-xs font-bold text-purple-700 bg-purple-50 hover:bg-purple-100 border border-purple-200 px-3 py-2 rounded-lg transition-colors"
+                                    >
+                                        <Plus className="w-4 h-4 mr-1" />
+                                        Add New Skill
                                     </button>
                                 </div>
-                                
-                                <div className="space-y-4">
+
+                                <div className="space-y-3">
                                     {formData.skills.map((skill, idx) => (
-                                        <div key={idx} className="flex flex-col md:flex-row gap-4 items-start md:items-end bg-gray-50 p-4 rounded-md border border-blue-100">
+                                        <div key={idx} className="flex flex-col md:flex-row gap-3 items-start md:items-center bg-gray-50/80 p-3.5 rounded-lg border border-gray-200">
                                             <div className="flex-1 w-full">
-                                                <label className="block text-gray-500 text-xs font-medium mb-1.5 font-medium">Skill Name</label>
-                                                <input type="text" className="w-full bg-white border border-gray-200 text-gray-800 rounded-lg px-3 py-2 text-sm focus:border-purple-500 outline-none" placeholder="e.g. React.js, Python, Communication" value={skill.name} onChange={e => handleArrayChange('skills', idx, 'name', e.target.value)} />
+                                                <input 
+                                                    type="text" 
+                                                    className="w-full bg-white border border-gray-300 text-gray-900 rounded-lg px-3 py-2 text-sm focus:border-purple-500 focus:ring-1 focus:ring-purple-500 outline-none" 
+                                                    placeholder="Skill name (e.g. Node.js, Docker, Python)" 
+                                                    value={skill.name} 
+                                                    onChange={e => handleArrayChange('skills', idx, 'name', e.target.value)} 
+                                                />
                                             </div>
-                                            <div className="w-full md:w-40">
-                                                <label className="block text-gray-500 text-xs font-medium mb-1.5 font-medium">Category</label>
-                                                <select className="w-full bg-white border border-gray-200 text-gray-800 rounded-lg px-3 py-2 text-sm focus:border-purple-500 outline-none" value={skill.category} onChange={e => handleArrayChange('skills', idx, 'category', e.target.value)}>
+                                            <div className="w-full md:w-44">
+                                                <select 
+                                                    className="w-full bg-white border border-gray-300 text-gray-800 rounded-lg px-3 py-2 text-sm focus:border-purple-500 outline-none" 
+                                                    value={skill.category} 
+                                                    onChange={e => handleArrayChange('skills', idx, 'category', e.target.value)}
+                                                >
                                                     <option value="Technical">Technical</option>
                                                     <option value="Soft">Soft Skill</option>
-                                                    <option value="Domain">Domain Knowledge</option>
+                                                    <option value="Domain">Domain / Tool</option>
                                                 </select>
                                             </div>
-                                            <div className="w-full md:w-40">
-                                                <label className="block text-gray-500 text-xs font-medium mb-1.5 font-medium">Proficiency</label>
-                                                <select className="w-full bg-white border border-gray-200 text-gray-800 rounded-lg px-3 py-2 text-sm focus:border-purple-500 outline-none" value={skill.level} onChange={e => handleArrayChange('skills', idx, 'level', e.target.value)}>
+                                            <div className="w-full md:w-44">
+                                                <select 
+                                                    className="w-full bg-white border border-gray-300 text-gray-800 rounded-lg px-3 py-2 text-sm focus:border-purple-500 outline-none" 
+                                                    value={skill.level} 
+                                                    onChange={e => handleArrayChange('skills', idx, 'level', e.target.value)}
+                                                >
                                                     <option value="Beginner">Beginner</option>
                                                     <option value="Intermediate">Intermediate</option>
                                                     <option value="Advanced">Advanced</option>
@@ -313,8 +432,12 @@ const ProfileBuilder = () => {
                                                 </select>
                                             </div>
                                             {formData.skills.length > 1 && (
-                                                <button onClick={() => removeArrayItem('skills', idx)} className="p-2.5 text-gray-500 hover:text-red-400 bg-white hover:bg-red-950/30 rounded-lg transition-colors border border-blue-100 hover:border-red-900/50">
-                                                    
+                                                <button 
+                                                    onClick={() => removeArrayItem('skills', idx)} 
+                                                    className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors border border-transparent hover:border-red-200"
+                                                    title="Remove skill"
+                                                >
+                                                    <Trash2 className="w-4 h-4" />
                                                 </button>
                                             )}
                                         </div>
@@ -323,96 +446,254 @@ const ProfileBuilder = () => {
                             </div>
                         )}
 
-                        {/* STEP 3: PROJECTS */}
+                        {/* STEP 3: PROJECTS & CAREER PREFERENCES */}
                         {currentStep === 3 && (
                             <div className="space-y-6">
-                                <div className="flex justify-between items-center mb-6">
-                                    <h3 className="text-xl font-medium text-gray-800 flex items-center">
-                                         Key Projects
-                                    </h3>
-                                    <button onClick={() => addArrayItem('projects', { title: '', description: '', technologiesUsed: '', githubUrl: '' })} className="flex items-center text-xs font-medium text-emerald-400 hover:text-emerald-300 bg-emerald-900/30 px-3 py-1.5 rounded-md transition-colors">
-                                         ADD PROJECT
+                                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-gray-100 pb-4 mb-6">
+                                    <div>
+                                        <h3 className="text-lg font-bold text-gray-900 flex items-center">
+                                            <Briefcase className="w-5 h-5 mr-2 text-emerald-600" />
+                                            Key Projects
+                                        </h3>
+                                        <p className="text-xs text-gray-500 mt-1">Showcase high-impact projects with modern technologies.</p>
+                                    </div>
+                                    <button 
+                                        onClick={() => addArrayItem('projects', { title: '', description: '', technologiesUsed: '', githubUrl: '', liveUrl: '' })} 
+                                        className="flex items-center text-xs font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 px-3 py-2 rounded-lg transition-colors"
+                                    >
+                                        <Plus className="w-4 h-4 mr-1" />
+                                        Add New Project
                                     </button>
                                 </div>
-                                
+
                                 <div className="space-y-6">
                                     {formData.projects.map((proj, idx) => (
-                                        <div key={idx} className="bg-gray-50 p-5 rounded-md border border-blue-100 relative">
+                                        <div key={idx} className="bg-gray-50/70 p-5 rounded-lg border border-gray-200 relative">
                                             {formData.projects.length > 1 && (
-                                                <button onClick={() => removeArrayItem('projects', idx)} className="absolute top-4 right-4 text-gray-500 hover:text-red-400 transition-colors">
-                                                    
+                                                <button 
+                                                    onClick={() => removeArrayItem('projects', idx)} 
+                                                    className="absolute top-4 right-4 text-gray-400 hover:text-red-600 p-1 rounded-md hover:bg-red-50 transition-colors"
+                                                    title="Remove project"
+                                                >
+                                                    <Trash2 className="w-4 h-4" />
                                                 </button>
                                             )}
+                                            
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 pr-8">
                                                 <div>
-                                                    <label className="block text-gray-500 text-xs font-medium mb-1.5 font-medium">Project Title</label>
-                                                    <input type="text" className="w-full bg-white border border-gray-200 text-gray-800 rounded-lg px-3 py-2 text-sm focus:border-emerald-500 outline-none" placeholder="e.g. AI Chatbot" value={proj.title} onChange={e => handleArrayChange('projects', idx, 'title', e.target.value)} />
+                                                    <label className="block text-gray-700 text-xs font-semibold mb-1.5">Project Title</label>
+                                                    <input 
+                                                        type="text" 
+                                                        className="w-full bg-white border border-gray-300 text-gray-900 rounded-lg px-3 py-2 text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none" 
+                                                        placeholder="e.g. AI-Powered Resume Ranker" 
+                                                        value={proj.title} 
+                                                        onChange={e => handleArrayChange('projects', idx, 'title', e.target.value)} 
+                                                    />
                                                 </div>
                                                 <div>
-                                                    <label className="block text-gray-500 text-xs font-medium mb-1.5 font-medium">Tech Stack (comma separated)</label>
-                                                    <input type="text" className="w-full bg-white border border-gray-200 text-gray-800 rounded-lg px-3 py-2 text-sm focus:border-emerald-500 outline-none" placeholder="e.g. React, Node.js, MongoDB" value={proj.technologiesUsed} onChange={e => handleArrayChange('projects', idx, 'technologiesUsed', e.target.value)} />
+                                                    <label className="block text-gray-700 text-xs font-semibold mb-1.5">Tech Stack (comma-separated)</label>
+                                                    <input 
+                                                        type="text" 
+                                                        className="w-full bg-white border border-gray-300 text-gray-900 rounded-lg px-3 py-2 text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none" 
+                                                        placeholder="React, Node.js, Express, MongoDB" 
+                                                        value={proj.technologiesUsed} 
+                                                        onChange={e => handleArrayChange('projects', idx, 'technologiesUsed', e.target.value)} 
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-gray-700 text-xs font-semibold mb-1.5">Repository Link (GitHub)</label>
+                                                    <input 
+                                                        type="url" 
+                                                        className="w-full bg-white border border-gray-300 text-gray-900 rounded-lg px-3 py-2 text-sm focus:border-emerald-500 outline-none" 
+                                                        placeholder="https://github.com/username/project" 
+                                                        value={proj.githubUrl} 
+                                                        onChange={e => handleArrayChange('projects', idx, 'githubUrl', e.target.value)} 
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-gray-700 text-xs font-semibold mb-1.5">Live Demo URL</label>
+                                                    <input 
+                                                        type="url" 
+                                                        className="w-full bg-white border border-gray-300 text-gray-900 rounded-lg px-3 py-2 text-sm focus:border-emerald-500 outline-none" 
+                                                        placeholder="https://myproject.vercel.app" 
+                                                        value={proj.liveUrl || ''} 
+                                                        onChange={e => handleArrayChange('projects', idx, 'liveUrl', e.target.value)} 
+                                                    />
                                                 </div>
                                             </div>
+
                                             <div>
-                                                <label className="block text-gray-500 text-xs font-medium mb-1.5 font-medium">Description</label>
-                                                <textarea rows="3" className="w-full bg-white border border-gray-200 text-gray-800 rounded-lg px-3 py-2 text-sm focus:border-emerald-500 outline-none resize-none" placeholder="What did you build and what problem did it solve?" value={proj.description} onChange={e => handleArrayChange('projects', idx, 'description', e.target.value)}></textarea>
+                                                <label className="block text-gray-700 text-xs font-semibold mb-1.5">Project Overview & Results</label>
+                                                <textarea 
+                                                    rows="3" 
+                                                    className="w-full bg-white border border-gray-300 text-gray-900 rounded-lg px-3 py-2 text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none resize-none" 
+                                                    placeholder="Engineered a full-stack platform supporting 500+ active users with 99.9% uptime..." 
+                                                    value={proj.description} 
+                                                    onChange={e => handleArrayChange('projects', idx, 'description', e.target.value)}
+                                                ></textarea>
                                             </div>
                                         </div>
                                     ))}
                                 </div>
+
+                                <div className="border-t border-gray-100 pt-6 mt-6">
+                                    <h3 className="text-lg font-bold text-gray-900 flex items-center mb-4">
+                                        <Target className="w-5 h-5 mr-2 text-blue-600" />
+                                        Target Role & Location Preferences
+                                    </h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-gray-700 text-xs font-semibold mb-1.5">Target Roles</label>
+                                            <input 
+                                                type="text" 
+                                                className="w-full bg-gray-50 border border-gray-200 text-gray-900 rounded-lg px-4 py-2.5 text-sm focus:bg-white focus:border-blue-500 outline-none" 
+                                                placeholder="e.g. Full Stack Developer, DevOps Engineer" 
+                                                value={formData.career.targetRoles} 
+                                                onChange={e => updateField('career', 'targetRoles', e.target.value)} 
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-gray-700 text-xs font-semibold mb-1.5">Preferred Locations</label>
+                                            <input 
+                                                type="text" 
+                                                className="w-full bg-gray-50 border border-gray-200 text-gray-900 rounded-lg px-4 py-2.5 text-sm focus:bg-white focus:border-blue-500 outline-none" 
+                                                placeholder="e.g. Remote, Bengaluru, Hyderabad" 
+                                                value={formData.career.preferredLocations} 
+                                                onChange={e => updateField('career', 'preferredLocations', e.target.value)} 
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         )}
 
-                        {/* STEP 4: RESUME GENERATOR */}
+                        {/* STEP 4: REVIEW & RESUME GENERATION */}
                         {currentStep === 4 && (
-                            <div className="space-y-6 text-center py-8">
-                                <div className="w-20 h-20 bg-blue-600 rounded-lg mx-auto flex items-center justify-center mb-6 shadow-sm">
-                                    
+                            <div className="py-6 text-center max-w-2xl mx-auto">
+                                <div className="w-16 h-16 bg-blue-50 border border-blue-200 rounded-2xl mx-auto flex items-center justify-center mb-4 text-blue-600 shadow-sm">
+                                    <Sparkles className="w-8 h-8" />
                                 </div>
-                                <h3 className="text-2xl font-medium text-gray-800 mb-2">Profile Complete!</h3>
-                                <p className="text-gray-600 max-w-md mx-auto mb-8">Your digital profile is ready. You can now generate an ATS-friendly resume using your verified data, or proceed to the Skill Center for gap analysis.</p>
-                                
-                                <div className="flex flex-col sm:flex-row justify-center gap-4">
-                                    <button onClick={generateResumePDF} className="flex items-center justify-center px-6 py-3 bg-white text-gray-800 rounded-md font-medium hover:bg-gray-100 transition-colors shadow-lg">
-                                        
-                                        Generate Resume (PDF)
-                                    </button>
-                                    
-                                    <button onClick={saveProfile} disabled={isSaving} className="flex items-center justify-center px-6 py-3 bg-blue-600 border border-gray-200 text-gray-800 rounded-md font-medium hover:bg-gray-800 transition-colors">
-                                        {isSaving ? 'Saving...' : 'Save Profile to Database'}
-                                    </button>
-                                </div>
-                                {message.text && (
-                                    <div className={`mt-6 px-4 py-2 rounded-md max-w-md mx-auto text-sm font-medium ${message.type === 'success' ? 'bg-green-900/50 text-green-400 border border-green-500' : 'bg-red-900/50 text-red-400 border border-red-500'}`}>
-                                        {message.text}
-                                    </div>
-                                )}
+                                <h3 className="text-2xl font-bold text-gray-900 mb-2">Profile Completed & Ready!</h3>
+                                <p className="text-gray-600 text-sm mb-8">
+                                    Your verified student profile is ready. You can save all attributes to the database or instantly download an ATS-compliant PDF resume formatted for recruiting algorithms.
+                                </p>
 
+                                <div className="flex flex-col sm:flex-row justify-center gap-4">
+                                    <button 
+                                        onClick={generateResumePDF} 
+                                        className="flex items-center justify-center px-6 py-3 bg-white text-gray-800 border border-gray-300 rounded-lg font-semibold hover:bg-gray-50 transition-all shadow-sm active:scale-95 text-sm"
+                                    >
+                                        <Download className="w-4 h-4 mr-2 text-blue-600" />
+                                        Download Instant PDF
+                                    </button>
+
+                                    <button 
+                                        onClick={saveProfile} 
+                                        disabled={isSaving}
+                                        className="flex items-center justify-center px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-all shadow-md active:scale-95 text-sm disabled:opacity-50"
+                                    >
+                                        <Save className="w-4 h-4 mr-2" />
+                                        {isSaving ? 'Synchronizing...' : 'Save Profile Changes'}
+                                    </button>
+                                </div>
                             </div>
                         )}
                     </motion.div>
                 </AnimatePresence>
+
+                {/* Bottom Step Navigation Controls */}
+                <div className="flex justify-between items-center mt-10 pt-6 border-t border-gray-100">
+                    <button 
+                        onClick={prevStep}
+                        disabled={currentStep === 1}
+                        className={`flex items-center px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
+                            currentStep === 1 
+                                ? 'opacity-0 pointer-events-none' 
+                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        }`}
+                    >
+                        <ChevronLeft className="w-4 h-4 mr-1" />
+                        Previous Step
+                    </button>
+                    
+                    {currentStep < 4 ? (
+                        <button 
+                            onClick={nextStep}
+                            className="flex items-center px-6 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 shadow-sm transition-all"
+                        >
+                            Next Step
+                            <ChevronRight className="w-4 h-4 ml-1" />
+                        </button>
+                    ) : (
+                        <div className="w-24"></div>
+                    )}
+                </div>
             </div>
 
-            {/* Navigation Controls */}
-            <div className="flex justify-between items-center mt-8">
-                <button 
-                    onClick={prevStep}
-                    disabled={currentStep === 1}
-                    className={`flex items-center px-5 py-2.5 rounded-md font-semibold transition-all ${currentStep === 1 ? 'opacity-0 pointer-events-none' : 'bg-white border border-blue-100 text-gray-800 hover:bg-gray-800'}`}
-                >
-                     Back
-                </button>
-                
-                {currentStep < 4 ? (
-                    <button 
-                        onClick={nextStep}
-                        className="flex items-center px-6 py-2.5 rounded-md font-medium bg-blue-600 text-gray-800 hover:bg-blue-500 transition-all shadow-sm"
-                    >
-                        Next Step 
-                    </button>
-                ) : (
-                    <div className="w-24"></div> // spacer
+            {/* HIDDEN RESUME PREVIEW CONTAINER FOR PDF CAPTURE (Rendered offscreen) */}
+            <div 
+                id="resume-pdf-template" 
+                style={{ display: 'none', width: '800px', backgroundColor: '#ffffff', color: '#111827', padding: '40px', fontFamily: 'sans-serif' }}
+            >
+                <div style={{ borderBottom: '2px solid #2563eb', paddingBottom: '16px', marginBottom: '24px' }}>
+                    <h1 style={{ fontSize: '28px', fontWeight: 'bold', margin: 0, color: '#1e3a8a' }}>
+                        {formData.personal.name || user?.name || 'Student Name'}
+                    </h1>
+                    <div style={{ fontSize: '13px', color: '#4b5563', marginTop: '6px' }}>
+                        {formData.personal.phone && <span>{formData.personal.phone} • </span>}
+                        {user?.email && <span>{user.email} • </span>}
+                        {formData.personal.linkedinUrl && <span>{formData.personal.linkedinUrl} • </span>}
+                        {formData.personal.githubUrl && <span>{formData.personal.githubUrl}</span>}
+                    </div>
+                </div>
+
+                {formData.academic.college && (
+                    <div style={{ marginBottom: '20px' }}>
+                        <h2 style={{ fontSize: '16px', fontWeight: 'bold', textTransform: 'uppercase', color: '#2563eb', borderBottom: '1px solid #e5e7eb', paddingBottom: '4px', marginBottom: '8px' }}>
+                            Education
+                        </h2>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold', fontSize: '14px' }}>
+                            <span>{formData.academic.college}</span>
+                            <span>{formData.academic.graduationYear ? `Class of ${formData.academic.graduationYear}` : ''}</span>
+                        </div>
+                        <div style={{ fontSize: '13px', color: '#4b5563' }}>
+                            {formData.academic.department} {formData.academic.cgpa ? `| CGPA: ${formData.academic.cgpa}` : ''}
+                        </div>
+                    </div>
+                )}
+
+                {formData.skills && formData.skills.length > 0 && (
+                    <div style={{ marginBottom: '20px' }}>
+                        <h2 style={{ fontSize: '16px', fontWeight: 'bold', textTransform: 'uppercase', color: '#2563eb', borderBottom: '1px solid #e5e7eb', paddingBottom: '4px', marginBottom: '8px' }}>
+                            Technical Skills
+                        </h2>
+                        <div style={{ fontSize: '13px', color: '#374151', lineHeight: '1.6' }}>
+                            <strong>Languages & Frameworks:</strong> {formData.skills.map(s => s.name).filter(Boolean).join(', ')}
+                        </div>
+                    </div>
+                )}
+
+                {formData.projects && formData.projects.length > 0 && (
+                    <div style={{ marginBottom: '20px' }}>
+                        <h2 style={{ fontSize: '16px', fontWeight: 'bold', textTransform: 'uppercase', color: '#2563eb', borderBottom: '1px solid #e5e7eb', paddingBottom: '4px', marginBottom: '8px' }}>
+                            Featured Projects
+                        </h2>
+                        {formData.projects.map((proj, idx) => (
+                            <div key={idx} style={{ marginBottom: '12px' }}>
+                                <div style={{ fontWeight: 'bold', fontSize: '14px', color: '#111827' }}>
+                                    {proj.title}
+                                </div>
+                                {proj.technologiesUsed && (
+                                    <div style={{ fontSize: '12px', fontStyle: 'italic', color: '#6b7280', marginBottom: '4px' }}>
+                                        Technologies: {proj.technologiesUsed}
+                                    </div>
+                                )}
+                                <div style={{ fontSize: '13px', color: '#4b5563', lineHeight: '1.4' }}>
+                                    {proj.description}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
                 )}
             </div>
         </div>
