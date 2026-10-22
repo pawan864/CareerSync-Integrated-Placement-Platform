@@ -10,6 +10,7 @@
 | Method | Endpoint | Access | Description |
 | :--- | :--- | :--- | :--- |
 | `GET` | `/me` | Student | Fetch authenticated student profile |
+| `GET` | `/analytics/summary` | Student | Comprehensive dashboard metrics (completion %, verified skills, active courses) |
 | `POST` | `/` | Student | Create or update full profile |
 | `GET` | `/?department=&minCgpa=&skill=` | Faculty, TPO, Recruiter | Filter and search all student profiles |
 | `GET` | `/user/:userId` | Private | Retrieve specific student profile |
@@ -50,6 +51,7 @@
 | Method | Endpoint | Access | Description |
 | :--- | :--- | :--- | :--- |
 | `GET` | `/matching-roles` | Student | Rank all industry roles by student readiness ($0-100\%$) |
+| `GET` | `/leaderboard` | Private | Student leaderboard ranking by verified skills and assessment points |
 | `PUT` | `/target-roles` | Student | Set preferred target career tracks |
 | `GET` | `/my-target-gaps` | Student | Get readiness summaries for all selected target roles |
 | `GET` | `/gap/:roleId` | Private | In-depth gap report with recommended courses & tests |
