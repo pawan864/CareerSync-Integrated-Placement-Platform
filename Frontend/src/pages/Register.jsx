@@ -22,6 +22,12 @@ const preloadUrls = [
     "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?q=60&w=600&h=800&auto=format&fit=crop"
 ];
 preloadUrls.forEach(url => { const img = new Image(); img.src = url; });
+
+// Cloudflare Turnstile SiteKey with automatic localhost fallback to prevent Error 110200
+const TURNSTILE_SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY || 
+    (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+        ? '1x00000000000000000000AA' 
+        : '0x4AAAAAAFRwCYnHjksWpzIg');
 import { GraduationCap, ArrowLeft, User, Building, Briefcase, BookOpen, Sun, Moon, X } from 'lucide-react';
 
 const Register = () => {
@@ -464,7 +470,7 @@ const Register = () => {
                             </label>
                         </div>
 
-                        <div className="mt-4 flex justify-center w-full"><Turnstile siteKey="0x4AAAAAAFRwCYnHjksWpzIg" onSuccess={(token) => setTurnstileToken(token)} /></div>
+                        <div className="mt-4 flex justify-center w-full"><Turnstile siteKey={TURNSTILE_SITE_KEY} onSuccess={(token) => setTurnstileToken(token)} /></div>
                                             <button type="submit" disabled={!termsAccepted}
                             className={`w-full flex items-center justify-center font-semibold py-2.5 rounded-lg transition-all duration-300 text-xs shadow-md ${termsAccepted ? `${themeStyles[globalTheme].primaryBtn} text-white shadow-blue-500/30 cursor-pointer` : 'bg-gray-400 text-gray-200 cursor-not-allowed'}`}
                         >

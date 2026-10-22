@@ -33,6 +33,12 @@ const preloadUrls = [
     "https://images.unsplash.com/photo-1552664730-d307ca884978?q=60&w=400&auto=format&fit=crop"
 ];
 preloadUrls.forEach(url => { const img = new Image(); img.src = url; });
+
+// Cloudflare Turnstile SiteKey with automatic localhost fallback to prevent Error 110200
+const TURNSTILE_SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY || 
+    (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+        ? '1x00000000000000000000AA' 
+        : '0x4AAAAAAFRwCYnHjksWpzIg');
 import api from '../services/api';
 import { 
     ArrowLeft, Loader2, Home, MessageSquare, Send, CheckCircle2, ArrowRight, Mail, Eye, EyeOff, X, 
@@ -615,7 +621,7 @@ const Login = () => {
                                                 </div>
                                             )}
 
-                                            <div className="mt-4 flex justify-center w-full"><Turnstile siteKey="0x4AAAAAAFRwCYnHjksWpzIg" onSuccess={(token) => setTurnstileToken(token)} /></div>
+                                            <div className="mt-4 flex justify-center w-full"><Turnstile siteKey={TURNSTILE_SITE_KEY} onSuccess={(token) => setTurnstileToken(token)} /></div>
 <button type="submit" disabled={isVerifying || loginSuccess}
                                                 className={`w-full flex items-center justify-center font-semibold py-2.5 rounded-lg transition-all duration-300 mt-4 text-xs shadow-md ${
                                                     loginSuccess 
@@ -830,7 +836,7 @@ const Login = () => {
                                                 </div>
                                             )}
 
-                                            <div className="mt-4 flex justify-center w-full"><Turnstile siteKey="0x4AAAAAAFRwCYnHjksWpzIg" onSuccess={(token) => setTurnstileToken(token)} /></div>
+                                            <div className="mt-4 flex justify-center w-full"><Turnstile siteKey={TURNSTILE_SITE_KEY} onSuccess={(token) => setTurnstileToken(token)} /></div>
 <button type="submit" disabled={isVerifying || loginSuccess}
                                                 className={`w-full flex items-center justify-center font-semibold py-2.5 rounded-lg transition-all duration-300 mt-4 text-xs shadow-md ${
                                                     loginSuccess 
@@ -1093,7 +1099,7 @@ const Login = () => {
                                                 </div>
                                             )}
 
-                                        <div className="mt-4 flex justify-center w-full"><Turnstile siteKey="0x4AAAAAAFRwCYnHjksWpzIg" onSuccess={(token) => setTurnstileToken(token)} /></div>
+                                        <div className="mt-4 flex justify-center w-full"><Turnstile siteKey={TURNSTILE_SITE_KEY} onSuccess={(token) => setTurnstileToken(token)} /></div>
 <button type="submit" disabled={isVerifying || loginSuccess}
                                             className={`w-full flex items-center justify-center font-semibold py-2.5 rounded-lg transition-all duration-300 mt-4 text-xs shadow-md ${
                                                 loginSuccess 
@@ -1341,7 +1347,7 @@ const Login = () => {
                                                 </div>
                                             )}
 
-                                        <div className="mt-4 flex justify-center w-full"><Turnstile siteKey="0x4AAAAAAFRwCYnHjksWpzIg" onSuccess={(token) => setTurnstileToken(token)} /></div>
+                                        <div className="mt-4 flex justify-center w-full"><Turnstile siteKey={TURNSTILE_SITE_KEY} onSuccess={(token) => setTurnstileToken(token)} /></div>
 <button type="submit" disabled={isVerifying || loginSuccess}
                                             className={`w-full md:w-[85%] mx-auto flex items-center justify-center font-semibold py-2.5 md:py-2 rounded-lg transition-all duration-300 mt-4 text-xs shadow-md ${
                                                 loginSuccess 
@@ -1535,7 +1541,7 @@ const Login = () => {
                                                 </div>
                                             )}
 
-                                            <div className="mt-4 flex justify-center w-full"><Turnstile siteKey="0x4AAAAAAFRwCYnHjksWpzIg" onSuccess={(token) => setTurnstileToken(token)} /></div>
+                                            <div className="mt-4 flex justify-center w-full"><Turnstile siteKey={TURNSTILE_SITE_KEY} onSuccess={(token) => setTurnstileToken(token)} /></div>
 <button type="submit" disabled={isVerifying || loginSuccess}
                                                   className={`w-full flex items-center justify-center font-semibold py-2.5 rounded-lg transition-all duration-300 mt-6 text-xs shadow-[0_0_15px_rgba(220,38,38,0.2)] ${
                                                       loginSuccess 
