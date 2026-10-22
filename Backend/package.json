@@ -9,7 +9,9 @@
     "test:backend": "node tests/studentSkillVerification.test.js",
     "seed": "node seeder.js -i",
     "seed:destroy": "node seeder.js -d",
-    "optimize:indexes": "node scripts/optimizeIndexes.js"
+    "optimize:indexes": "node scripts/optimizeIndexes.js",
+    "db:backup": "node scripts/backupDatabase.js",
+    "db:restore": "node scripts/restoreDatabase.js"
   },
   "keywords": [],
   "author": "",
