@@ -1,4 +1,4 @@
-﻿import React, { useState, useContext } from 'react';
+import React, { useState, useContext } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 import { 
@@ -151,7 +151,7 @@ const StudentDashboard = () => {
             {/* Main Content Area */}
             <div className="flex-1 flex flex-col relative z-10 overflow-hidden bg-transparent">
                 {/* Top Header */}
-                <header className="h-20 border-b border-gray-800 bg-gradient-to-r from-white via-blue-50 to-blue-100/80 backdrop-blur-md flex items-center justify-between px-4 md:px-8 z-10">
+                <header className="h-20 border-b border-blue-200 bg-gradient-to-r from-white via-blue-50 to-blue-100/80 backdrop-blur-md flex items-center justify-between px-4 md:px-8 z-10">
                     <div className="flex items-center">
                         <button 
                             onClick={() => setMobileMenuOpen(true)}
@@ -160,7 +160,7 @@ const StudentDashboard = () => {
                             <Menu className="w-6 h-6" />
                         </button>
                         <div>
-                        <h2 className="text-2xl font-medium text-blue-900">
+                        <h2 className="text-2xl font-bold text-blue-900">
                             {navItems.find(i => i.id === activeTab)?.label}
                         </h2>
                         <p className="text-sm text-gray-600">
@@ -171,12 +171,11 @@ const StudentDashboard = () => {
                     <div className="flex items-center space-x-4 relative" onMouseEnter={() => setIsDropdownOpen(true)} onMouseLeave={() => setIsDropdownOpen(false)}>
                         <div className="flex flex-col text-right mr-2">
                             <span className="text-sm font-semibold text-blue-900">{user?.name || 'Student Name'}</span>
-                            <span className="text-xs text-blue-600 font-medium uppercase flex items-center justify-end">
+                            <span className="text-xs text-blue-600 font-bold uppercase flex items-center justify-end">
                                 STUDENT
                             </span>
                         </div>
                         <div 
-                            
                             className="w-10 h-10 rounded-full bg-blue-900 flex items-center justify-center text-white font-bold shadow-md border-2 border-white cursor-pointer hover:shadow-lg transition-all"
                         >
                             {user?.name ? user.name.charAt(0).toUpperCase() : 'S'}
@@ -189,10 +188,10 @@ const StudentDashboard = () => {
                                     initial={{ opacity: 0, y: 10, scale: 0.95 }}
                                     animate={{ opacity: 1, y: 0, scale: 1 }}
                                     exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                                    className="absolute top-14 right-0 w-48 bg-white rounded-md shadow-lg border border-blue-100 py-2 z-50"
+                                    className="absolute top-14 right-0 w-48 bg-white rounded-xl shadow-lg border border-blue-100 py-2 z-50"
                                 >
                                     <div className="px-4 py-2 border-b border-blue-50 mb-1">
-                                        <p className="text-sm font-semibold text-gray-800 truncate">{user?.name || 'Student'}</p>
+                                        <p className="text-sm font-bold text-gray-800 truncate">{user?.name || 'Student'}</p>
                                         <p className="text-xs text-gray-500 truncate">{user?.email || 'student@careersync.com'}</p>
                                     </div>
                                     <button 
@@ -200,15 +199,17 @@ const StudentDashboard = () => {
                                             setActiveTab('profile');
                                             setIsDropdownOpen(false);
                                         }}
-                                        className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 transition-colors flex items-center"
+                                        className="w-full text-left px-4 py-2 text-xs font-semibold text-gray-700 hover:bg-blue-50 transition-colors flex items-center"
                                     >
-                                         My Profile
+                                        <User className="w-3.5 h-3.5 mr-2 text-blue-600" />
+                                        My Profile
                                     </button>
                                     <button 
                                         onClick={handleLogout}
-                                        className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors flex items-center"
+                                        className="w-full text-left px-4 py-2 text-xs font-semibold text-red-600 hover:bg-red-50 transition-colors flex items-center"
                                     >
-                                         Logout
+                                        <LogOut className="w-3.5 h-3.5 mr-2" />
+                                        Logout
                                     </button>
                                 </motion.div>
                             )}
