@@ -572,3 +572,67 @@ exports.getProfiles = async (req, res, next) => {
         next(err);
     }
 };
+
+// @desc    Get comprehensive student dashboard analytics & completion metric
+// @route   GET /api/profile/analytics/summary
+// @access  Private (Student)
+exports.getProfileAnalyticsSummary = async (req, res, next) => {
+    try {
+        const profile = await StudentProfile.findOne({ user: req.user.id })
+            .populate('user', ['name', 'email']);
+
+        if (!profile) {
+            return res.status(404).json({ success: false, error: 'Profile not found' });
+        }
+
+        // Calculate Profile Completion Percentage
+        let completionScore = 0;
+        const weights = {
+            personal: 15,
+            academic: 20,
+            skills: 20,
+            education: 15,
+            projects: 15,
+            certifications: 10,
+            experience: 5
+        };
+
+        if (profile.personalInfo?.phone || profile.personalInfo?.bio) completionScore += weights.personal;
+        if (profile.academicInfo?.college && profile.academicInfo?.department && profile.academicInfo?.cgpa) completionScore += weights.academic;
+        if (profile.skills?.length >= 3) completionScore += weights.skills;
+        else if (profile.skills?.length > 0) completionScore += 10;
+        if (profile.education?.length > 0) completionScore += weights.education;
+        if (profile.projects?.length > 0) completionScore += weights.projects;
+        if (profile.certifications?.length > 0) completionScore += weights.certifications;
+        if (profile.experience?.length > 0) completionScore += weights.experience;
+
+        const verifiedSkills = (profile.skills || []).filter(s => s.isVerified);
+
+        // Fetch Training Enrollments
+        const TrainingEnrollment = require('../models/TrainingEnrollment');
+        const enrollments = await TrainingEnrollment.find({ student: req.user.id });
+        const completedCourses = enrollments.filter(e => e.status === 'Completed').length;
+        const activeCourses = enrollments.filter(e => e.status === 'In Progress' || e.status === 'Enrolled').length;
+
+        res.status(200).json({
+            success: true,
+            data: {
+                profileCompletionPercentage: Math.min(100, completionScore),
+                skillsMetrics: {
+                    totalSkills: profile.skills?.length || 0,
+                    verifiedSkillsCount: verifiedSkills.length,
+                    verifiedSkillsList: verifiedSkills.map(s => s.name)
+                },
+                learningMetrics: {
+                    totalEnrolled: enrollments.length,
+                    activeCourses,
+                    completedCourses
+                },
+                placementStatus: profile.placementStatus?.status || 'Seeking Opportunities',
+                targetRoles: profile.careerInterests?.targetRoles || []
+            }
+        });
+    } catch (err) {
+        next(err);
+    }
+};

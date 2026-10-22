@@ -407,3 +407,56 @@ exports.deleteIndustryRole = async (req, res, next) => {
         next(err);
     }
 };
+
+// @desc    Get skill & assessment leaderboard across students
+// @route   GET /api/skills/leaderboard
+// @access  Private
+exports.getSkillLeaderboard = async (req, res, next) => {
+    try {
+        const { department, limit = 20 } = req.query;
+        const matchQuery = {};
+        if (department) {
+            matchQuery['academicInfo.department'] = new RegExp(department, 'i');
+        }
+
+        const profiles = await StudentProfile.find(matchQuery)
+            .populate('user', ['name', 'email'])
+            .select('user academicInfo skills projects certifications');
+
+        const leaderboard = profiles.map(profile => {
+            const verifiedSkills = (profile.skills || []).filter(s => s.isVerified);
+            const totalScore = (profile.skills || []).reduce((acc, s) => acc + (s.proficiencyScore || 0), 0);
+            const projectPoints = (profile.projects?.length || 0) * 15;
+            const certPoints = (profile.certifications?.length || 0) * 20;
+            const overallRankScore = totalScore + (verifiedSkills.length * 50) + projectPoints + certPoints;
+
+            return {
+                studentId: profile.user?._id,
+                name: profile.user?.name || 'Anonymous Student',
+                department: profile.academicInfo?.department || 'General',
+                cgpa: profile.academicInfo?.cgpa || 0,
+                verifiedSkillsCount: verifiedSkills.length,
+                topSkills: verifiedSkills.slice(0, 5).map(s => s.name),
+                projectsCount: profile.projects?.length || 0,
+                rankScore: overallRankScore
+            };
+        });
+
+        // Sort descending by rankScore
+        leaderboard.sort((a, b) => b.rankScore - a.rankScore);
+
+        // Assign rank numbers
+        const rankedLeaderboard = leaderboard.slice(0, Number(limit)).map((item, index) => ({
+            rank: index + 1,
+            ...item
+        }));
+
+        res.status(200).json({
+            success: true,
+            count: rankedLeaderboard.length,
+            data: rankedLeaderboard
+        });
+    } catch (err) {
+        next(err);
+    }
+};

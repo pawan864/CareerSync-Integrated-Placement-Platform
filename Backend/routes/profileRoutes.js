@@ -28,12 +28,17 @@ const {
     deleteExperience,
     addAchievement,
     deleteAchievement,
-    updatePlacementStatus
+    updatePlacementStatus,
+    getProfileAnalyticsSummary
 } = require('../controllers/profileController');
 
 const { protect, authorize } = require('../middleware/authMiddleware');
 
 const router = express.Router();
+
+// Student Analytics Summary
+router.route('/analytics/summary')
+    .get(protect, authorize('student'), getProfileAnalyticsSummary);
 
 // Root Profile routes
 router.route('/me')

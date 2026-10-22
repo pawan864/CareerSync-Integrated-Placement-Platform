@@ -12,6 +12,7 @@ const {
     setTargetRoles,
     getMyTargetRoleGaps,
     getDepartmentSkillGapAnalytics,
+    getSkillLeaderboard,
     getIndustryRoles,
     getIndustryRoleById,
     createIndustryRole,
@@ -22,6 +23,10 @@ const {
 const { protect, authorize } = require('../middleware/authMiddleware');
 
 const router = express.Router();
+
+// Student Skill Leaderboard
+router.route('/leaderboard')
+    .get(protect, getSkillLeaderboard);
 
 // Role-matching and target-role endpoints (must come before /:roleId)
 router.route('/matching-roles')
