@@ -58,7 +58,7 @@ const StudentDashboard = () => {
         { id: 'profile', label: 'My Profile', icon: User, desc: 'Digital Resume & Details' },
         { id: 'resume', label: 'Resume Builder', icon: LayoutTemplate, desc: 'Create ATS-friendly CVs' },
         
-        { id: 'skills', label: 'Skill Center', icon: BrainCircuit, desc: 'Assessments & Gaps' },
+        { id: 'skills', label: 'Skill Center', icon: BrainCircuit, desc: 'Assessments, Gaps & Leaderboard' },
         { id: 'certifications', label: 'Certifications', icon: Award, desc: 'Manage verified credentials' },
         
         { id: 'opportunities', label: 'Opportunities', icon: Briefcase, desc: 'Jobs, Internships & Projects' },

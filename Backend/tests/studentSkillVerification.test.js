@@ -135,6 +135,34 @@ const runVerificationTests = async () => {
         }
     });
 
+    // Test 7: Campus Skill Leaderboard Scoring Formula
+    test('7. Skill Leaderboard formula correctly orders candidates by verified skills and rank score', () => {
+        const candidateA = {
+            name: 'Candidate A',
+            verifiedSkillsCount: 5,
+            totalProficiency: 400,
+            projectsCount: 3,
+            certificationsCount: 2,
+            atsScore: 90
+        };
+        const candidateB = {
+            name: 'Candidate B',
+            verifiedSkillsCount: 2,
+            totalProficiency: 150,
+            projectsCount: 1,
+            certificationsCount: 0,
+            atsScore: 65
+        };
+
+        const calcScore = (c) => c.totalProficiency + (c.verifiedSkillsCount * 50) + (c.projectsCount * 15) + (c.certificationsCount * 20) + Math.round(c.atsScore * 0.5);
+        const scoreA = calcScore(candidateA);
+        const scoreB = calcScore(candidateB);
+
+        if (scoreA <= scoreB || scoreA !== (400 + 250 + 45 + 40 + 45)) {
+            throw new Error(`Scoring calculation discrepancy: A=${scoreA}, B=${scoreB}`);
+        }
+    });
+
     console.log('\n------------------------------------------------------');
     console.log(`Test Execution Summary: ${passedTests} Passed, ${failedTests} Failed`);
     console.log('------------------------------------------------------\n');

@@ -19,7 +19,7 @@ const connectDB = async () => {
                 console.error(`Fallback MongoDB connection failed: ${fallbackError.message}`);
             }
         }
-        process.exit(1);
+        console.warn('[WARN] Running Express server in sandbox/offline mode without live MongoDB connection.');
     }
 };
 

@@ -52,3 +52,23 @@ exports.authorize = (...roles) => {
     };
 };
 
+// Optional authentication (populates req.user if valid token provided, but does not block if unauthenticated)
+exports.optionalAuth = async (req, res, next) => {
+    let token;
+    if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+        token = req.headers.authorization.split(' ')[1];
+    } else if (req.cookies && req.cookies.token) {
+        token = req.cookies.token;
+    }
+
+    if (token) {
+        try {
+            const decoded = jwt.verify(token, process.env.JWT_SECRET);
+            req.user = await User.findById(decoded.id);
+        } catch (err) {
+            // Silently continue without user
+        }
+    }
+    next();
+};
+

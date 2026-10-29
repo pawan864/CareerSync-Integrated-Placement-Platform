@@ -20,13 +20,13 @@ const {
     deleteIndustryRole
 } = require('../controllers/skillMappingController');
 
-const { protect, authorize } = require('../middleware/authMiddleware');
+const { protect, authorize, optionalAuth } = require('../middleware/authMiddleware');
 
 const router = express.Router();
 
-// Student Skill Leaderboard
+// Student Skill Leaderboard (Accessible to authenticated users or public viewers with optional auth)
 router.route('/leaderboard')
-    .get(protect, getSkillLeaderboard);
+    .get(optionalAuth, getSkillLeaderboard);
 
 // Role-matching and target-role endpoints (must come before /:roleId)
 router.route('/matching-roles')

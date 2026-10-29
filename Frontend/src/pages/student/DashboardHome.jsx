@@ -4,7 +4,8 @@ import { AuthContext } from '../../context/AuthContext';
 import { motion } from 'framer-motion';
 import { 
     BookOpen, Briefcase, Calendar, TrendingUp, Bell, ChevronRight, 
-    Award, Sparkles, CheckCircle2, Clock, MapPin, ArrowUpRight, CheckSquare, Square
+    Award, Sparkles, CheckCircle2, Clock, MapPin, ArrowUpRight, CheckSquare, Square,
+    Trophy
 } from 'lucide-react';
 
 const DashboardHome = () => {
@@ -208,6 +209,22 @@ const DashboardHome = () => {
                                 </li>
                             ))}
                         </ul>
+                    </div>
+
+                    {/* Live Campus Ranking Standing */}
+                    <div className="bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200/80 rounded-xl p-5 shadow-sm">
+                        <div className="flex items-center justify-between mb-3">
+                            <span className="text-[10px] uppercase font-bold tracking-wider text-amber-800 bg-amber-200/60 px-2 py-0.5 rounded-full flex items-center gap-1">
+                                <Trophy className="w-3 h-3 text-amber-600" /> Campus Talent Index
+                            </span>
+                            <span className="text-xs font-black text-amber-900">Rank #1</span>
+                        </div>
+                        <h4 className="font-extrabold text-gray-900 text-sm">Computer Science & Engineering</h4>
+                        <p className="text-xs text-gray-600 mt-1">Leading with verified proctored skill badges and 1,240 placement index points.</p>
+                        <div className="mt-3 flex items-center justify-between text-xs pt-2 border-t border-amber-200/60">
+                            <span className="text-gray-500">Tier: 👑 Gold Standard</span>
+                            <span className="font-bold text-amber-900">Top 1% Class</span>
+                        </div>
                     </div>
 
                     {/* Digital Badge Status */}

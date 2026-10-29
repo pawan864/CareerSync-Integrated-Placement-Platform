@@ -5,7 +5,8 @@ import {
     BrainCircuit, Target, BookOpen, CheckCircle, 
     PlayCircle, TrendingUp, AlertTriangle, Lightbulb,
     Clock, Award, ArrowRight, Check, X, ShieldAlert, Sparkles,
-    ChevronRight, ExternalLink, RefreshCw
+    ChevronRight, ExternalLink, RefreshCw, Trophy, Medal, Crown,
+    Flame, ShieldCheck, Search, Filter
 } from 'lucide-react';
 import {
     Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, 
@@ -45,6 +46,14 @@ const SkillCenter = () => {
     const [learningResources, setLearningResources] = useState([]);
     const [enrolledIds, setEnrolledIds] = useState(new Set());
     const [enrollingId, setEnrollingId] = useState(null);
+
+    // ---------------------------------------------
+    // TAB 4: CAMPUS SKILL LEADERBOARD STATE
+    // ---------------------------------------------
+    const [leaderboard, setLeaderboard] = useState([]);
+    const [leaderboardLoading, setLeaderboardLoading] = useState(false);
+    const [selectedDept, setSelectedDept] = useState('All');
+    const [leaderboardSearch, setLeaderboardSearch] = useState('');
 
     // Fetch initial data
     const fetchAssessmentsAndHistory = async () => {
@@ -119,10 +128,26 @@ const SkillCenter = () => {
         }
     };
 
+    const fetchLeaderboard = async (dept = selectedDept) => {
+        try {
+            setLeaderboardLoading(true);
+            const query = (dept && dept !== 'All') ? `?department=${encodeURIComponent(dept)}` : '';
+            const res = await api.get(`/skills/leaderboard${query}`);
+            if (res.data?.success) {
+                setLeaderboard(res.data.data || []);
+            }
+        } catch (err) {
+            console.error("Failed to load skill leaderboard:", err);
+        } finally {
+            setLeaderboardLoading(false);
+        }
+    };
+
     useEffect(() => {
         fetchAssessmentsAndHistory();
         fetchRolesAndGap();
         fetchLearningHub();
+        fetchLeaderboard('All');
     }, []);
 
     // ---------------------------------------------
@@ -315,12 +340,17 @@ const SkillCenter = () => {
                     </p>
                 </div>
                 
-                <div className="flex bg-white rounded-lg p-1 border border-gray-200 shadow-sm">
-                    {['assessments', 'analysis', 'learning'].map(tab => (
+                <div className="flex bg-white rounded-lg p-1 border border-gray-200 shadow-sm overflow-x-auto">
+                    {['assessments', 'analysis', 'learning', 'leaderboard'].map(tab => (
                         <button
                             key={tab}
-                            onClick={() => setActiveTab(tab)}
-                            className={`px-4 py-2 rounded-md text-xs font-bold transition-all ${
+                            onClick={() => {
+                                setActiveTab(tab);
+                                if (tab === 'leaderboard' && leaderboard.length === 0) {
+                                    fetchLeaderboard(selectedDept);
+                                }
+                            }}
+                            className={`px-3.5 py-2 rounded-md text-xs font-bold transition-all whitespace-nowrap ${
                                 activeTab === tab 
                                     ? 'bg-blue-600 text-white shadow-sm' 
                                     : 'text-gray-600 hover:text-gray-900'
@@ -329,6 +359,7 @@ const SkillCenter = () => {
                             {tab === 'assessments' && '1. Skill Assessments'}
                             {tab === 'analysis' && '2. Gap Analysis'}
                             {tab === 'learning' && '3. Learning Path'}
+                            {tab === 'leaderboard' && '4. Campus Leaderboard'}
                         </button>
                     ))}
                 </div>
@@ -620,6 +651,422 @@ const SkillCenter = () => {
                                         No courses currently available.
                                     </div>
                                 )}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* TAB 4: CAMPUS SKILL LEADERBOARD & TALENT RANKINGS */}
+                    {activeTab === 'leaderboard' && (
+                        <div className="space-y-8">
+                            {/* Leaderboard Hero Banner */}
+                            <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-blue-950 rounded-2xl p-6 sm:p-8 text-white relative overflow-hidden shadow-xl border border-indigo-900/50">
+                                <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 rounded-full bg-blue-600/20 blur-3xl pointer-events-none"></div>
+                                <div className="absolute bottom-0 left-1/3 -mb-12 w-48 h-48 rounded-full bg-amber-500/10 blur-2xl pointer-events-none"></div>
+
+                                <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+                                    <div className="max-w-2xl">
+                                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 text-xs font-semibold mb-3">
+                                            <Trophy className="w-3.5 h-3.5 text-amber-400" />
+                                            Live Campus Talent Index
+                                        </div>
+                                        <h3 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white mb-2">
+                                            Skill Leaderboard & Candidate Rankings
+                                        </h3>
+                                        <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                                            Rankings dynamically computed using anti-cheat proctored assessments, verified skill proficiencies, production projects, and recruiter ATS resume readiness.
+                                        </p>
+                                    </div>
+
+                                    {/* Action Refresh Button */}
+                                    <button
+                                        onClick={() => fetchLeaderboard(selectedDept)}
+                                        disabled={leaderboardLoading}
+                                        className="self-start md:self-auto inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 text-xs font-bold transition-all backdrop-blur-sm disabled:opacity-50"
+                                    >
+                                        <RefreshCw className={`w-3.5 h-3.5 ${leaderboardLoading ? 'animate-spin' : ''}`} />
+                                        Sync Live Standings
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Department Filters & Search Controls */}
+                            <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm flex flex-col md:flex-row items-center justify-between gap-4">
+                                <div className="flex items-center gap-2 overflow-x-auto w-full md:w-auto pb-1 md:pb-0">
+                                    <Filter className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                                    {['All', 'Computer Science & Engineering', 'Information Technology', 'Electronics & Communication'].map(dept => (
+                                        <button
+                                            key={dept}
+                                            onClick={() => {
+                                                setSelectedDept(dept);
+                                                fetchLeaderboard(dept);
+                                            }}
+                                            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap ${
+                                                selectedDept === dept
+                                                    ? 'bg-blue-600 text-white shadow-sm'
+                                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                            }`}
+                                        >
+                                            {dept === 'All' ? 'All Departments' : dept.split(' ')[0]}
+                                        </button>
+                                    ))}
+                                </div>
+
+                                <div className="relative w-full md:w-72">
+                                    <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                                    <input
+                                        type="text"
+                                        placeholder="Search candidate or skill..."
+                                        value={leaderboardSearch}
+                                        onChange={(e) => setLeaderboardSearch(e.target.value)}
+                                        className="w-full pl-9 pr-3 py-2 text-xs bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all"
+                                    />
+                                </div>
+                            </div>
+
+                            {/* TOP 3 PODIUM */}
+                            {leaderboard.length >= 3 && !leaderboardSearch && (
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4 items-end">
+                                    {/* 2nd Place (Silver) */}
+                                    <div className="order-2 md:order-1 bg-white rounded-2xl border-2 border-slate-200 p-6 shadow-sm flex flex-col items-center text-center relative hover:shadow-md transition-shadow">
+                                        <div className="w-12 h-12 rounded-full bg-slate-100 text-slate-700 flex items-center justify-center font-black text-lg border-2 border-slate-300 absolute -top-6 shadow-md">
+                                            2
+                                        </div>
+                                        <div className="mt-4 mb-2">
+                                            <div className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 text-[10px] font-bold uppercase tracking-wider mb-2">
+                                                <Medal className="w-3 h-3 text-slate-500" /> Silver Tier
+                                            </div>
+                                            <h4 className="text-base font-bold text-gray-900">{leaderboard[1]?.name}</h4>
+                                            <p className="text-xs text-gray-500">{leaderboard[1]?.department}</p>
+                                        </div>
+
+                                        <div className="w-full bg-slate-50 rounded-xl p-3 my-3 border border-slate-100 space-y-1.5 text-xs">
+                                            <div className="flex justify-between text-gray-600">
+                                                <span>Verified Badges:</span>
+                                                <span className="font-bold text-gray-900 flex items-center gap-1">
+                                                    <ShieldCheck className="w-3.5 h-3.5 text-blue-600" />
+                                                    {leaderboard[1]?.verifiedSkillsCount}
+                                                </span>
+                                            </div>
+                                            <div className="flex justify-between text-gray-600">
+                                                <span>ATS Score:</span>
+                                                <span className="font-bold text-emerald-600">{leaderboard[1]?.atsScore}%</span>
+                                            </div>
+                                            <div className="flex justify-between text-gray-600">
+                                                <span>Placement Index:</span>
+                                                <span className="font-black text-slate-900">{leaderboard[1]?.rankScore} pts</span>
+                                            </div>
+                                        </div>
+
+                                        <div className="flex flex-wrap justify-center gap-1.5 mt-1">
+                                            {(leaderboard[1]?.topSkills || []).slice(0, 3).map((skill, idx) => (
+                                                <span key={idx} className="px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 text-[10px] font-medium">
+                                                    {skill}
+                                                </span>
+                                            ))}
+                                        </div>
+
+                                        {leaderboard[1]?.portfolioSlug && (
+                                            <a
+                                                href={`/portfolio/${leaderboard[1].portfolioSlug}`}
+                                                target="_blank"
+                                                rel="noreferrer"
+                                                className="mt-4 inline-flex items-center gap-1 text-xs font-bold text-blue-600 hover:text-blue-800"
+                                            >
+                                                View Portfolio <ExternalLink className="w-3 h-3" />
+                                            </a>
+                                        )}
+                                    </div>
+
+                                    {/* 1st Place (Gold) - Highlighted */}
+                                    <div className="order-1 md:order-2 bg-gradient-to-b from-amber-50/70 to-white rounded-2xl border-2 border-amber-400 p-6 shadow-xl flex flex-col items-center text-center relative -translate-y-2 hover:shadow-2xl transition-all">
+                                        <div className="w-14 h-14 rounded-full bg-amber-400 text-amber-950 flex items-center justify-center font-black text-xl border-4 border-white absolute -top-7 shadow-lg">
+                                            👑
+                                        </div>
+                                        <div className="mt-5 mb-2">
+                                            <div className="inline-flex items-center gap-1 px-3 py-0.5 rounded-full bg-amber-100 text-amber-900 text-[11px] font-extrabold uppercase tracking-wider mb-2 border border-amber-300">
+                                                <Crown className="w-3.5 h-3.5 text-amber-600" /> Rank #1 Champion
+                                            </div>
+                                            <h4 className="text-lg font-black text-gray-900 flex items-center justify-center gap-1.5">
+                                                {leaderboard[0]?.name}
+                                                {leaderboard[0]?.isCurrentStudent && (
+                                                    <span className="text-[10px] bg-blue-600 text-white px-2 py-0.5 rounded-full font-bold">You</span>
+                                                )}
+                                            </h4>
+                                            <p className="text-xs text-gray-500 font-medium">{leaderboard[0]?.department}</p>
+                                        </div>
+
+                                        <div className="w-full bg-amber-50/60 rounded-xl p-3.5 my-3 border border-amber-200/80 space-y-2 text-xs">
+                                            <div className="flex justify-between text-gray-700">
+                                                <span className="font-medium">Verified Badges:</span>
+                                                <span className="font-bold text-gray-900 flex items-center gap-1">
+                                                    <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                                                    {leaderboard[0]?.verifiedSkillsCount} Badges
+                                                </span>
+                                            </div>
+                                            <div className="flex justify-between text-gray-700">
+                                                <span className="font-medium">ATS Readiness:</span>
+                                                <span className="font-black text-emerald-700">{leaderboard[0]?.atsScore}%</span>
+                                            </div>
+                                            <div className="flex justify-between text-gray-700 pt-1 border-t border-amber-200/60">
+                                                <span className="font-bold text-gray-900">Total Placement Score:</span>
+                                                <span className="font-black text-amber-900 text-sm flex items-center gap-1">
+                                                    <Flame className="w-4 h-4 text-amber-600 fill-amber-500" />
+                                                    {leaderboard[0]?.rankScore} pts
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        <div className="flex flex-wrap justify-center gap-1.5 mt-1">
+                                            {(leaderboard[0]?.topSkills || []).map((skill, idx) => (
+                                                <span key={idx} className="px-2 py-0.5 rounded-md bg-amber-100 text-amber-900 text-[10px] font-semibold">
+                                                    {skill}
+                                                </span>
+                                            ))}
+                                        </div>
+
+                                        {leaderboard[0]?.portfolioSlug && (
+                                            <a
+                                                href={`/portfolio/${leaderboard[0].portfolioSlug}`}
+                                                target="_blank"
+                                                rel="noreferrer"
+                                                className="mt-4 w-full py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-md shadow-blue-500/20"
+                                            >
+                                                Inspect Verified Portfolio <ExternalLink className="w-3.5 h-3.5" />
+                                            </a>
+                                        )}
+                                    </div>
+
+                                    {/* 3rd Place (Bronze) */}
+                                    <div className="order-3 bg-white rounded-2xl border-2 border-amber-800/30 p-6 shadow-sm flex flex-col items-center text-center relative hover:shadow-md transition-shadow">
+                                        <div className="w-12 h-12 rounded-full bg-amber-900/10 text-amber-900 flex items-center justify-center font-black text-lg border-2 border-amber-800/40 absolute -top-6 shadow-md">
+                                            3
+                                        </div>
+                                        <div className="mt-4 mb-2">
+                                            <div className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-800/10 text-amber-900 text-[10px] font-bold uppercase tracking-wider mb-2">
+                                                <Medal className="w-3 h-3 text-amber-800" /> Bronze Tier
+                                            </div>
+                                            <h4 className="text-base font-bold text-gray-900">{leaderboard[2]?.name}</h4>
+                                            <p className="text-xs text-gray-500">{leaderboard[2]?.department}</p>
+                                        </div>
+
+                                        <div className="w-full bg-slate-50 rounded-xl p-3 my-3 border border-slate-100 space-y-1.5 text-xs">
+                                            <div className="flex justify-between text-gray-600">
+                                                <span>Verified Badges:</span>
+                                                <span className="font-bold text-gray-900 flex items-center gap-1">
+                                                    <ShieldCheck className="w-3.5 h-3.5 text-blue-600" />
+                                                    {leaderboard[2]?.verifiedSkillsCount}
+                                                </span>
+                                            </div>
+                                            <div className="flex justify-between text-gray-600">
+                                                <span>ATS Score:</span>
+                                                <span className="font-bold text-emerald-600">{leaderboard[2]?.atsScore}%</span>
+                                            </div>
+                                            <div className="flex justify-between text-gray-600">
+                                                <span>Placement Index:</span>
+                                                <span className="font-black text-slate-900">{leaderboard[2]?.rankScore} pts</span>
+                                            </div>
+                                        </div>
+
+                                        <div className="flex flex-wrap justify-center gap-1.5 mt-1">
+                                            {(leaderboard[2]?.topSkills || []).slice(0, 3).map((skill, idx) => (
+                                                <span key={idx} className="px-2 py-0.5 rounded-md bg-amber-900/10 text-amber-900 text-[10px] font-medium">
+                                                    {skill}
+                                                </span>
+                                            ))}
+                                        </div>
+
+                                        {leaderboard[2]?.portfolioSlug && (
+                                            <a
+                                                href={`/portfolio/${leaderboard[2].portfolioSlug}`}
+                                                target="_blank"
+                                                rel="noreferrer"
+                                                className="mt-4 inline-flex items-center gap-1 text-xs font-bold text-blue-600 hover:text-blue-800"
+                                            >
+                                                View Portfolio <ExternalLink className="w-3 h-3" />
+                                            </a>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* COMPLETE RANKINGS TABLE */}
+                            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+                                <div className="p-4 sm:p-5 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-gray-50/50">
+                                    <div>
+                                        <h4 className="text-sm font-bold text-gray-900">Campus Placement Standings</h4>
+                                        <p className="text-xs text-gray-500">
+                                            Showing {leaderboard.filter(i => !leaderboardSearch || i.name.toLowerCase().includes(leaderboardSearch.toLowerCase()) || (i.topSkills || []).some(s => s.toLowerCase().includes(leaderboardSearch.toLowerCase()))).length} candidates for {selectedDept === 'All' ? 'All Departments' : selectedDept}
+                                        </p>
+                                    </div>
+                                    <div className="text-xs text-gray-500 flex items-center gap-1.5">
+                                        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                                        Live Synced with Student Portfolios
+                                    </div>
+                                </div>
+
+                                <div className="overflow-x-auto">
+                                    <table className="w-full text-left text-xs">
+                                        <thead className="bg-gray-50/80 text-gray-500 font-bold border-b border-gray-200 uppercase tracking-wider text-[11px]">
+                                            <tr>
+                                                <th className="py-3 px-4 text-center">Rank</th>
+                                                <th className="py-3 px-4">Candidate Scholar</th>
+                                                <th className="py-3 px-4">Department & CGPA</th>
+                                                <th className="py-3 px-4">Verified Badges</th>
+                                                <th className="py-3 px-4">Key Proficiencies</th>
+                                                <th className="py-3 px-4 text-center">ATS Score</th>
+                                                <th className="py-3 px-4 text-right">Placement Score</th>
+                                                <th className="py-3 px-4 text-center">Portfolio</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-gray-100">
+                                            {leaderboard
+                                                .filter(item => {
+                                                    if (!leaderboardSearch) return true;
+                                                    const q = leaderboardSearch.toLowerCase();
+                                                    return item.name.toLowerCase().includes(q) || (item.topSkills || []).some(s => s.toLowerCase().includes(q));
+                                                })
+                                                .map((item) => {
+                                                    const isTop1 = item.rank === 1;
+                                                    const isTop2 = item.rank === 2;
+                                                    const isTop3 = item.rank === 3;
+
+                                                    return (
+                                                        <tr 
+                                                            key={item.studentId || item.rank}
+                                                            className={`hover:bg-blue-50/40 transition-colors ${
+                                                                item.isCurrentStudent ? 'bg-blue-50/80 font-medium' : ''
+                                                            }`}
+                                                        >
+                                                            {/* Rank Column */}
+                                                            <td className="py-3.5 px-4 text-center">
+                                                                {isTop1 && <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-amber-400 text-amber-950 font-black text-xs shadow-sm">👑 1</span>}
+                                                                {isTop2 && <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-slate-200 text-slate-800 font-bold text-xs">🥈 2</span>}
+                                                                {isTop3 && <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-amber-900/10 text-amber-900 font-bold text-xs">🥉 3</span>}
+                                                                {!isTop1 && !isTop2 && !isTop3 && (
+                                                                    <span className="font-bold text-gray-500">#{item.rank}</span>
+                                                                )}
+                                                            </td>
+
+                                                            {/* Candidate Scholar */}
+                                                            <td className="py-3.5 px-4">
+                                                                <div className="flex items-center gap-2.5">
+                                                                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${
+                                                                        item.isCurrentStudent 
+                                                                            ? 'bg-blue-600 text-white' 
+                                                                            : 'bg-gray-100 text-gray-700'
+                                                                    }`}>
+                                                                        {item.name.charAt(0)}
+                                                                    </div>
+                                                                    <div>
+                                                                        <div className="font-bold text-gray-900 flex items-center gap-1.5">
+                                                                            {item.name}
+                                                                            {item.isCurrentStudent && (
+                                                                                <span className="text-[10px] bg-blue-600 text-white px-1.5 py-0.2 rounded font-bold">You</span>
+                                                                            )}
+                                                                        </div>
+                                                                        <div className="text-[11px] text-gray-500">{item.projectsCount} Projects • {item.certificationsCount || 0} Certs</div>
+                                                                    </div>
+                                                                </div>
+                                                            </td>
+
+                                                            {/* Department & CGPA */}
+                                                            <td className="py-3.5 px-4">
+                                                                <div className="text-gray-900 font-medium">{item.department}</div>
+                                                                <div className="text-gray-500 text-[11px]">CGPA: <span className="font-semibold text-gray-700">{item.cgpa}</span></div>
+                                                            </td>
+
+                                                            {/* Verified Badges */}
+                                                            <td className="py-3.5 px-4">
+                                                                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-bold">
+                                                                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                                                                    {item.verifiedSkillsCount} Badges
+                                                                </span>
+                                                            </td>
+
+                                                            {/* Top Skills */}
+                                                            <td className="py-3.5 px-4">
+                                                                <div className="flex flex-wrap gap-1 max-w-xs">
+                                                                    {(item.topSkills || []).map((skill, sIdx) => (
+                                                                        <span key={sIdx} className="px-2 py-0.5 rounded bg-gray-100 text-gray-700 text-[10px] font-medium">
+                                                                            {skill}
+                                                                        </span>
+                                                                    ))}
+                                                                </div>
+                                                            </td>
+
+                                                            {/* ATS Score */}
+                                                            <td className="py-3.5 px-4 text-center">
+                                                                <span className={`font-bold px-2 py-0.5 rounded-full text-xs ${
+                                                                    (item.atsScore || 70) >= 85 
+                                                                        ? 'bg-emerald-100 text-emerald-800' 
+                                                                        : (item.atsScore || 70) >= 70 
+                                                                            ? 'bg-blue-100 text-blue-800' 
+                                                                            : 'bg-amber-100 text-amber-800'
+                                                                }`}>
+                                                                    {item.atsScore || 70}%
+                                                                </span>
+                                                            </td>
+
+                                                            {/* Placement Score */}
+                                                            <td className="py-3.5 px-4 text-right">
+                                                                <div className="font-black text-gray-900 text-sm">{item.rankScore}</div>
+                                                                <div className="text-[10px] text-gray-400">Index Points</div>
+                                                            </td>
+
+                                                            {/* Portfolio Link */}
+                                                            <td className="py-3.5 px-4 text-center">
+                                                                {item.portfolioSlug ? (
+                                                                    <a
+                                                                        href={`/portfolio/${item.portfolioSlug}`}
+                                                                        target="_blank"
+                                                                        rel="noreferrer"
+                                                                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 font-bold text-[11px] transition-colors"
+                                                                    >
+                                                                        View <ExternalLink className="w-3 h-3" />
+                                                                    </a>
+                                                                ) : (
+                                                                    <span className="text-gray-400 text-[11px] italic">Private</span>
+                                                                )}
+                                                            </td>
+                                                        </tr>
+                                                    );
+                                                })}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            {/* Transparent Scoring Rubric Breakdown */}
+                            <div className="bg-slate-50 border border-slate-200 rounded-xl p-5 text-xs text-gray-600">
+                                <h5 className="font-bold text-gray-900 text-sm mb-2 flex items-center gap-2">
+                                    <Sparkles className="w-4 h-4 text-blue-600" />
+                                    CareerSync Placement Index Computation Formula
+                                </h5>
+                                <p className="mb-3 text-gray-600 leading-relaxed">
+                                    To eliminate subjective shortlisting bias, CareerSync ranks candidates transparently using four multi-dimensional academic and technical vectors:
+                                </p>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+                                    <div className="bg-white p-3 rounded-lg border border-slate-200">
+                                        <div className="font-bold text-gray-900 mb-0.5">Verified Badges</div>
+                                        <div className="text-blue-600 font-semibold">+50 pts / badge</div>
+                                        <div className="text-[11px] text-gray-500 mt-1">Requires ≥ 70% in anti-cheat proctored assessments</div>
+                                    </div>
+                                    <div className="bg-white p-3 rounded-lg border border-slate-200">
+                                        <div className="font-bold text-gray-900 mb-0.5">Industry Projects</div>
+                                        <div className="text-blue-600 font-semibold">+15 pts / project</div>
+                                        <div className="text-[11px] text-gray-500 mt-1">Live deployed projects with verified code repos</div>
+                                    </div>
+                                    <div className="bg-white p-3 rounded-lg border border-slate-200">
+                                        <div className="font-bold text-gray-900 mb-0.5">Certifications</div>
+                                        <div className="text-blue-600 font-semibold">+20 pts / credential</div>
+                                        <div className="text-[11px] text-gray-500 mt-1">Accredited university and industry certificates</div>
+                                    </div>
+                                    <div className="bg-white p-3 rounded-lg border border-slate-200">
+                                        <div className="font-bold text-gray-900 mb-0.5">ATS Resume Readiness</div>
+                                        <div className="text-blue-600 font-semibold">+0.5x ATS Score</div>
+                                        <div className="text-[11px] text-gray-500 mt-1">Industry standard keyword and format compliance</div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     )}
