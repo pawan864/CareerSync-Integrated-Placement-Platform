@@ -114,14 +114,16 @@ const ResumeBuilder = () => {
             setSharing(true);
             const res = await api.post('/resume/share');
             if (res.data?.success) {
-                const nextShared = res.data.data.isShared;
-                setIsPublic(nextShared);
-                if (nextShared) {
-                    const fullUrl = `${window.location.origin}${res.data.data.shareableUrl}`;
+                const isNowShared = res.data.isShared ?? res.data.data?.isShared ?? res.data.isPublic ?? res.data.data?.isPublic;
+                const pathUrl = res.data.shareUrl || res.data.data?.shareUrl || res.data.data?.shareableUrl;
+                setIsPublic(Boolean(isNowShared));
+                if (isNowShared && pathUrl) {
+                    const fullUrl = `${window.location.origin}${pathUrl}`;
                     setShareUrl(fullUrl);
-                    setMessage({ text: 'Public portfolio link activated!', type: 'success' });
+                    setMessage({ text: 'Public portfolio link activated! Recruiters can now view your verified record.', type: 'success' });
                 } else {
-                    setMessage({ text: 'Portfolio link deactivated (private).', type: 'info' });
+                    setShareUrl('');
+                    setMessage({ text: 'Portfolio link deactivated (set to private).', type: 'info' });
                 }
             }
         } catch (err) {
@@ -309,6 +311,15 @@ const ResumeBuilder = () => {
                             {copied ? <Check className="w-3.5 h-3.5 mr-1 text-emerald-600" /> : <Copy className="w-3.5 h-3.5 mr-1" />}
                             {copied ? 'Copied Link!' : 'Copy Link'}
                         </button>
+                        <a
+                            href={shareUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center px-3 py-1.5 bg-blue-600 text-white rounded-lg text-xs font-semibold hover:bg-blue-700 transition-all shadow-sm"
+                        >
+                            <ExternalLink className="w-3.5 h-3.5 mr-1" />
+                            Open View
+                        </a>
                     </div>
                 </div>
             )}

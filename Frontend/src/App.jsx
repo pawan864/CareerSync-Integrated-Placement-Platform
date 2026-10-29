@@ -20,6 +20,7 @@ import JobBoard from './pages/JobBoard';
 import EmployerDashboard from './pages/EmployerDashboard';
 import FacultyDashboard from './pages/FacultyDashboard';
 import StudentDashboard from './pages/student/StudentDashboard';
+import PublicPortfolio from './pages/PublicPortfolio';
 
 import InstitutionDashboard from './pages/InstitutionDashboard';
 import ForgotPassword from './pages/ForgotPassword';
@@ -29,12 +30,14 @@ import Footer from './components/Footer';
 
 const AppContent = () => {
   const location = useLocation();
+  const isPortfolioPage = location.pathname.startsWith('/portfolio/');
   const isAuthPage = location.pathname === '/login' || location.pathname === '/github/callback' || location.pathname === '/register' || location.pathname === '/forgot-password' || location.pathname === '/support' || location.pathname === '/admin-login' || location.pathname === '/otp-verify' || location.pathname === '/student-dashboard' || location.pathname === '/admin-dashboard' || location.pathname === '/faculty-dashboard';
+  const hideChrome = isAuthPage || isPortfolioPage;
 
   return (
     <div className="min-h-[100dvh] bg-gray-50 flex flex-col w-full max-w-[100vw] overflow-x-hidden md:overflow-x-clip">
-      {!isAuthPage && <Navbar />}
-      {!isAuthPage && <NotificationTicker />}
+      {!hideChrome && <Navbar />}
+      {!hideChrome && <NotificationTicker />}
       <main className="flex-grow flex flex-col">
         <Routes>
           <Route path="/" element={<Home />} />
@@ -43,7 +46,7 @@ const AppContent = () => {
           <Route path="/admin-login" element={<AdminLogin />} />
           <Route path="/admin-dashboard" element={<AdminDashboard />} />
           <Route path="/register" element={<Register />} />
-                <Route path="/support" element={<Support />} />
+          <Route path="/support" element={<Support />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/skill-gap" element={<SkillGap />} />
@@ -51,11 +54,12 @@ const AppContent = () => {
           <Route path="/employer" element={<EmployerDashboard />} />
           <Route path="/faculty-dashboard" element={<FacultyDashboard />} />
           <Route path="/student-dashboard" element={<StudentDashboard />} />
+          <Route path="/portfolio/:slug" element={<PublicPortfolio />} />
 
           <Route path="/institution" element={<InstitutionDashboard />} />
         </Routes>
       </main>
-      {!isAuthPage && <Footer />}
+      {!hideChrome && <Footer />}
     </div>
   );
 };

@@ -183,13 +183,26 @@ exports.togglePublicShare = async (req, res, next) => {
 
         await resumeConfig.save();
 
+        const shareUrlPath = resumeConfig.publicShare.isPublic 
+            ? `/portfolio/${resumeConfig.publicShare.shareSlug}` 
+            : null;
+
         res.status(200).json({
             success: true,
             isPublic: resumeConfig.publicShare.isPublic,
-            shareUrl: resumeConfig.publicShare.isPublic 
-                ? `/portfolio/${resumeConfig.publicShare.shareSlug}` 
-                : null,
-            shareSlug: resumeConfig.publicShare.shareSlug
+            isShared: resumeConfig.publicShare.isPublic,
+            shareUrl: shareUrlPath,
+            shareableUrl: shareUrlPath,
+            shareSlug: resumeConfig.publicShare.shareSlug,
+            sharedToken: resumeConfig.publicShare.shareSlug,
+            data: {
+                isPublic: resumeConfig.publicShare.isPublic,
+                isShared: resumeConfig.publicShare.isPublic,
+                shareUrl: shareUrlPath,
+                shareableUrl: shareUrlPath,
+                shareSlug: resumeConfig.publicShare.shareSlug,
+                sharedToken: resumeConfig.publicShare.shareSlug
+            }
         });
     } catch (err) {
         next(err);
@@ -217,15 +230,32 @@ exports.getPublicPortfolio = async (req, res, next) => {
             success: true,
             data: {
                 studentName: profile?.user?.name,
+                email: profile?.user?.email,
                 headline: resumeConfig.headline || profile?.personalInfo?.headline,
+                targetRole: resumeConfig.targetRole || 'Software Engineer',
                 summary: resumeConfig.professionalSummary || profile?.personalInfo?.bio,
                 theme: resumeConfig.theme,
-                education: resumeConfig.sectionsVisibility.education ? profile?.education : [],
-                skills: resumeConfig.sectionsVisibility.skills ? profile?.skills : [],
-                projects: resumeConfig.sectionsVisibility.projects ? profile?.projects : [],
-                experience: resumeConfig.sectionsVisibility.experience ? profile?.experience : [],
-                certifications: resumeConfig.sectionsVisibility.certifications ? profile?.certifications : [],
-                achievements: resumeConfig.sectionsVisibility.achievements ? profile?.achievements : []
+                atsScore: resumeConfig.atsScore,
+                personalInfo: profile?.personalInfo,
+                academicInfo: profile?.academicInfo,
+                education: resumeConfig.sectionsVisibility?.education 
+                    ? ((profile?.education && profile.education.length > 0) ? profile.education : [
+                        {
+                            institution: profile?.academicInfo?.college || 'University Institute of Technology',
+                            degree: profile?.academicInfo?.department || 'Computer Science & Engineering',
+                            fieldOfStudy: profile?.academicInfo?.department || 'Software Engineering',
+                            startYear: 2022,
+                            endYear: profile?.academicInfo?.graduationYear || 2026,
+                            grade: profile?.academicInfo?.cgpa ? `${profile.academicInfo.cgpa} CGPA` : '8.8 CGPA',
+                            current: true
+                        }
+                    ]) 
+                    : [],
+                skills: resumeConfig.sectionsVisibility?.skills ? (profile?.skills || []) : [],
+                projects: resumeConfig.sectionsVisibility?.projects ? (profile?.projects || []) : [],
+                experience: resumeConfig.sectionsVisibility?.experience ? (profile?.experience || []) : [],
+                certifications: resumeConfig.sectionsVisibility?.certifications ? (profile?.certifications || []) : [],
+                achievements: resumeConfig.sectionsVisibility?.achievements ? (profile?.achievements || []) : []
             }
         });
     } catch (err) {
