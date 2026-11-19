@@ -121,7 +121,7 @@ exports.getCompanyApplications = async (req, res, next) => {
     try {
         const company = await CompanyProfile.findOne({ user: req.user.id });
         if (!company) {
-            return res.status(404).json({ success: false, error: 'Company profile not found' });
+            return res.status(200).json({ success: true, count: 0, data: [] });
         }
 
         // Find all opportunities for this company
