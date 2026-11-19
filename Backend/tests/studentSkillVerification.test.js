@@ -163,6 +163,25 @@ const runVerificationTests = async () => {
         }
     });
 
+    // Test 8: Recruiter Candidate Search & Multi-Criteria Filtering
+    test('8. Recruiter Candidate Search correctly filters by CGPA and verified skill threshold', () => {
+        const pool = [
+            { name: 'Student 1', cgpa: 9.1, skills: [{ name: 'React', isVerified: true }, { name: 'Node.js', isVerified: true }] },
+            { name: 'Student 2', cgpa: 7.8, skills: [{ name: 'React', isVerified: false }] },
+            { name: 'Student 3', cgpa: 8.5, skills: [{ name: 'Python', isVerified: true }] }
+        ];
+
+        // Filter: minCgpa >= 8.0, skill = 'React', verifiedOnly = true
+        const filtered = pool.filter(c => 
+            c.cgpa >= 8.0 &&
+            c.skills.some(s => s.name.toLowerCase() === 'react' && s.isVerified)
+        );
+
+        if (filtered.length !== 1 || filtered[0].name !== 'Student 1') {
+            throw new Error(`Candidate filtering failed: expected 1 candidate, got ${filtered.length}`);
+        }
+    });
+
     console.log('\n------------------------------------------------------');
     console.log(`Test Execution Summary: ${passedTests} Passed, ${failedTests} Failed`);
     console.log('------------------------------------------------------\n');

@@ -46,7 +46,7 @@ router.route('/me')
 
 router.route('/')
     .post(protect, authorize('student'), createOrUpdateProfile)
-    .get(protect, authorize('faculty', 'industry', 'tpo', 'admin'), getProfiles);
+    .get(protect, authorize('faculty', 'recruiter', 'industry', 'tpo', 'admin'), getProfiles);
 
 router.route('/user/:userId')
     .get(protect, getProfileByUserId);
